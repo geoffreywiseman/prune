@@ -45,8 +45,8 @@ module Prune
     end
     
     def prune( folder_name )
-      return puts "ERROR: Cannot find folder: #{folder_name}" unless File.exists? folder_name
-      return puts "ERROR: #{folder_name} is not a folder" unless File.directory? folder_name
+      return puts( "ERROR: Cannot find folder: #{folder_name}" ) unless File.exists? folder_name
+      return puts( "ERROR: #{folder_name} is not a folder" ) unless File.directory? folder_name
       puts "Analyzing '#{folder_name}':"
     
       policy = RetentionPolicy.new folder_name
@@ -89,7 +89,7 @@ module Prune
         :dir
       elsif @today - created < 14 then
         :recent_retain
-      elsif @today.year == created.year && ( @today.month - created.month ) == 0 then
+      elsif @today.year == created.year && ( @today.month - created.month ) <= 0 then
         # this month, last month
         created.wday == 5 ? :sparse_retain : :remove
       else 
