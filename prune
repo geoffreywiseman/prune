@@ -7,7 +7,7 @@ module Prune
   
   class CommandLineInterface
     def self.parse_and_run
-      options = { :verbose => false, :did_work => false }
+      options = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true }
       parser = OptionParser.new do |opts|
           opts.banner = "Usage: prune [options] folder"
           opts.on( "-v", "--verbose", "Prints much more frequently during execution about what it's doing." ) { options[:verbose] = true }
@@ -83,8 +83,9 @@ module Prune
     end
   
     def categorize( file_name )
-      created = Date.parse(File.ctime(file_name).strftime('%Y/%m/%d'))
-      if File.directory? file_name then
+      path = File.join( @folder_name, file_name )
+      created = Date.parse(File.ctime(path).strftime('%Y/%m/%d'))
+      if File.directory? path then
         :dir
       elsif @today - created < 14 then
         :recent_retain
