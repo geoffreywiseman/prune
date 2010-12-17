@@ -40,6 +40,8 @@ module Prune
     
     def initialize( options )
       @options = options
+      @categories = Hash.new { |h,k| h[k] = [] } # initialize new keys with an empty array
+      @analyzed_count = 0
     end
     
     def prune( folder_name )
@@ -47,51 +49,67 @@ module Prune
       return puts "ERROR: #{folder_name} is not a folder" unless File.directory? folder_name
       puts "Analyzing '#{folder_name}':"
     
-      policy = RetentionPolicy.new folder_name, Dir.entries(folder_name), @options
+      policy = RetentionPolicy.new folder_name
+      Dir.foreach folder_name do |file|
+        analyze( policy, file )
+      end
+      print "\n" if @options[:verbose]
     
-      print "\tRemoving:\n\t\t#{policy.removing.join("\n\t\t")}\n\n" unless policy.removing.empty?
-      print "\tArchiving:\n\t\t#{policy.archiving.join("\n\t\t")}\n\n" unless policy.archiving.empty?
-      print "\tRetaining:\n\t\t#{policy.retaining.join("\n\t\t")}\n\n" unless policy.retaining.empty?
+      display_categories( policy )
     
-      print "\t#{policy.analyzed_count} file(s) analyzed\n"
+      print "\t#{@analyzed_count} file(s) analyzed\n"
+    end
+    
+    def display_categories( policy )
+      @categories.each_pair do |key,files|
+        print "\t#{policy.describe key}:\n\t\t"
+        puts files.join( "\n\t\t")
+      end
+    end
+    
+    def analyze( policy, file )
+      category = policy.categorize( file )
+      @categories[ category ] << file unless category.nil?
+      @analyzed_count += 1
+      print "\t#{file} -> #{category}\n" if @options[:verbose]
     end
   end
 
   class RetentionPolicy
-    attr_reader :analyzed_count, :removing, :archiving, :retaining
   
-    def initialize( folder_name, children, options )
-      @removing = []
-      @archiving = []
-      @retaining = []
-      @analyzed_count = 0
-      @options = options
-
-      children.each { |child| analyze File.join( folder_name, child ) }
-      puts "" if @options[:verbose]
+    def initialize( folder_name )
+      @folder_name = folder_name
+      @today = Date.today
     end
   
-    def analyze( file_name )
-      return if File.directory? file_name
-    
+    def categorize( file_name )
       created = Date.parse(File.ctime(file_name).strftime('%Y/%m/%d'))
-      today = Date.today
-    
-      if today - created < 14 then
-        # less than 14 days old, keep it
-        @retaining << file_name
-        puts "\t#{file_name} < 14 days old: retain" if @options[:verbose]
-      elsif today.year == created.year && ( today.month - created.month ) == 0 then
-        # same month, last month
-        ( created.wday == 5 ? @retaining : @removing ) << file_name
-        puts "\t#{file_name} last two months: keeping fridays (#{created.wday == 5 ? 'retain' : 'remove' })" if @options[:verbose]
+      if File.directory? file_name then
+        :dir
+      elsif @today - created < 14 then
+        :recent_retain
+      elsif @today.year == created.year && ( @today.month - created.month ) == 0 then
+        # this month, last month
+        created.wday == 5 ? :sparse_retain : :remove
       else 
         # earlier month
-        @archiving << file_name
-        puts "\t#{file_name} older than two months: archive" if @options[:verbose]
+        created.wday == 5 ? :old_archive : :remove
       end
+    end
     
-      @analyzed_count += 1
+    def describe( category )
+      case category
+      when :dir
+        "Directories (ignored)"
+      when :recent_retain
+        "Less Than 2 Weeks Old (retain)"
+      when :sparse_retain
+        "Friday Older than Two Weeks (retain)"
+      when :remove
+        "Non-Friday Older than Two Weeks (remove)"
+      when :old_archive
+        "Older than Two Months (archive)"
+      end
     end
   
   end
