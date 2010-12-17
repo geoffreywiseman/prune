@@ -11,6 +11,8 @@ module Prune
       parser = OptionParser.new do |opts|
           opts.banner = "Usage: prune [options] folder"
           opts.on( "-v", "--verbose", "Prints much more frequently during execution about what it's doing." ) { options[:verbose] = true }
+          opts.on( "-d", "--dry-run", "Categorizes files, but does not take any actions on them." ) { options[:dry_run] = true }
+          opts.on( "-f", "--force", "--no-prompt", "Will take action without asking permissions; useful for automation." ) { options[:prompt] = false }
           opts.on_tail( "--version", "Displays version information." ) do 
             options[:did_work] = true
             puts "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
@@ -47,27 +49,78 @@ module Prune
     def prune( folder_name )
       return puts( "ERROR: Cannot find folder: #{folder_name}" ) unless File.exists? folder_name
       return puts( "ERROR: #{folder_name} is not a folder" ) unless File.directory? folder_name
-      puts "Analyzing '#{folder_name}':"
-    
       policy = RetentionPolicy.new folder_name
+      analyze folder_name, policy
+      execute_prune( folder_name, policy ) unless @options[:dry_run]
+    end
+    
+    def analyze( folder_name, policy )
+      puts "Analyzing '#{folder_name}':"
       Dir.foreach folder_name do |file|
-        analyze( policy, file )
+        analyze_file( policy, file )
       end
       print "\n" if @options[:verbose]
-    
-      display_categories( policy )
-    
+      
+      display_categories policy
       print "\t#{@analyzed_count} file(s) analyzed\n"
     end
     
+    def execute_prune( folder_name, policy )
+      actions = 0
+      if @options[:prompt] && !prompt then
+        puts "Not proceeding; no actions taken."
+      else
+        @categories.each_pair do |category,files|
+          action = policy.action( category )
+          result = act( action, folder_name, files)
+          if !result.nil? then
+            puts result
+            actions += 1
+          end
+        end
+        puts "No actions necessary." if actions == 0
+      end
+    end
+    
+    def prompt
+      print "Proceed? [y/N]: "
+      response = STDIN.gets.chomp.strip.downcase
+      return ['y','yes','true'].include? response
+    end
+    
+    def act( action, folder_name, files )
+      case action
+      when :remove
+        paths = files.map { |file| File.join folder_name, file }
+        File.delete *paths
+        "#{files.size} file(s) deleted"
+      when :archive
+        groups = group_by_month folder_name, files
+        groups.each_pair do |month,files|
+          puts "TODO: Archive #{files.size} files for month #{month}"
+        end
+        sizes = groups.values.map { |x| x.size }.join( ', ' )
+        "#{groups.size} archive(s) created (#{sizes} file(s), respectively)"
+      end
+    end
+    
+    def group_by_month( folder_name, files )
+      groups = Hash.new { |h,k| h[k] = [] }
+      files.each do |file|
+        month = File.mtime( File.join( folder_name, file ) ).month
+        groups[ month ] << file
+      end
+      return groups
+    end
+    
     def display_categories( policy )
-      @categories.each_pair do |key,files|
-        print "\t#{policy.describe key}:\n\t\t"
+      @categories.each_pair do |category,files|
+        print "\t#{policy.describe category} (#{policy.action category}):\n\t\t"
         puts files.join( "\n\t\t")
       end
     end
     
-    def analyze( policy, file )
+    def analyze_file( policy, file )
       category = policy.categorize( file )
       @categories[ category ] << file unless category.nil?
       @analyzed_count += 1
@@ -84,33 +137,49 @@ module Prune
   
     def categorize( file_name )
       path = File.join( @folder_name, file_name )
-      created = Date.parse(File.ctime(path).strftime('%Y/%m/%d'))
+      created = Date.parse(File.mtime(path).strftime('%Y/%m/%d'))
       if File.directory? path then
         :dir
       elsif @today - created < 14 then
-        :recent_retain
+        :recent
       elsif @today.year == created.year && ( @today.month - created.month ) <= 0 then
         # this month, last month
-        created.wday == 5 ? :sparse_retain : :remove
+        created.wday == 5 ? :sparse : :remove
       else 
         # earlier month
-        created.wday == 5 ? :old_archive : :remove
+        created.wday == 5 ? :old : :remove
       end
     end
     
     def describe( category )
       case category
       when :dir
-        "Directories (ignored)"
-      when :recent_retain
-        "Less Than 2 Weeks Old (retain)"
-      when :sparse_retain
-        "Friday Older than Two Weeks (retain)"
+        "Directories"
+      when :recent
+        "Less Than 2 Weeks Old"
+      when :sparse
+        "Friday Older than Two Weeks"
       when :remove
-        "Non-Friday Older than Two Weeks (remove)"
-      when :old_archive
-        "Older than Two Months (archive)"
+        "Non-Friday Older than Two Weeks"
+      when :old
+        "Older than Two Months"
       end
+    end
+    
+    def action( category )
+      case category
+      when :dir
+        :ignore
+      when :recent
+        :retain
+      when :sparse
+        :retain
+      when :remove
+        :remove
+      when :old
+        :archive
+      end
+      
     end
   
   end
