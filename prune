@@ -1,0 +1,85 @@
+#!/usr/bin/ruby
+require 'optparse'
+require 'date'
+
+class Pruner
+  VERSION = [1,0,0]
+
+  def self.prune_all
+    options = {}
+    parser = OptionParser.new do |opts|
+        opts.banner = "Usage: prune [options] folder"
+        opts.on_tail( "--version", "Displays version information." ) do 
+          options[:output] = true
+          puts "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
+        end
+        opts.on_tail( "-?", "--help", "Shows quick help about using prune." ) do
+          options[:output] = true
+          puts opts
+        end
+    end
+
+    begin
+      parser.parse!
+    rescue OptionParser::ParseError
+      $stderr.print "Error: " + $! + "\n"
+      exit
+    end
+      
+    if ARGV.size != 1 then
+      print parser.help unless options[:output]
+    else
+      prune ARGV.first, options
+    end
+  end
+
+  def self.prune( folder_name, options )
+    return puts "ERROR: Cannot find folder: #{folder_name}" unless File.exists? folder_name
+    return puts "ERROR: #{folder_name} is not a folder" unless File.directory? folder_name
+    puts "Analyzing '#{folder_name}':"
+    
+    policy = RetentionPolicy.new folder_name, Dir.entries(folder_name)
+    
+    print "\tRemoving:\n\t\t#{policy.removing.join("\n\t\t")}\n\n" unless policy.removing.empty?
+    print "\tArchiving:\n\t\t#{policy.archiving.join("\n\t\t")}\n\n" unless policy.archiving.empty?
+    print "\tRetaining:\n\t\t#{policy.retaining.join("\n\t\t")}\n\n" unless policy.retaining.empty?
+    
+    print "\t#{policy.analyzed_count} file(s) analyzed\n"
+  end
+end
+
+class RetentionPolicy
+  attr_reader :analyzed_count, :removing, :archiving, :retaining
+  
+  def initialize( folder_name, children )
+    @removing = []
+    @archiving = []
+    @retaining = []
+    @analyzed_count = 0
+
+    children.each { |child| analyze File.join( folder_name, child ) }
+  end
+  
+  def analyze( file_name )
+    return if File.directory? file_name
+    
+    created = Date.parse(File.ctime(file_name).strftime('%Y/%m/%d'))
+    today = Date.today
+    
+    if today - created < 14 then
+      # less than 14 days old, keep it
+      @retaining << file_name
+    elsif today.year == created.year && ( today.month - created.month ) == 0 then
+      # same month, last month
+      ( created.wday == 5 ? @retaining : @removing ) << file_name
+    else 
+      # earlier month
+      @archiving << file_name
+    end
+    
+    @analyzed_count += 1
+  end
+  
+end
+
+Pruner.prune_all
