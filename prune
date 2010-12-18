@@ -1,18 +1,24 @@
 #!/usr/bin/ruby
+require 'rubygems'
 require 'optparse'
 require 'date'
+require 'zlib'
+require 'archive/tar/minitar'
+include Archive::Tar
 
 module Prune
   VERSION = [1,0,0]
   
   class CommandLineInterface
     def self.parse_and_run
-      options = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true }
+      options = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true }
       parser = OptionParser.new do |opts|
           opts.banner = "Usage: prune [options] folder"
           opts.on( "-v", "--verbose", "Prints much more frequently during execution about what it's doing." ) { options[:verbose] = true }
           opts.on( "-d", "--dry-run", "Categorizes files, but does not take any actions on them." ) { options[:dry_run] = true }
           opts.on( "-f", "--force", "--no-prompt", "Will take action without asking permissions; useful for automation." ) { options[:prompt] = false }
+          opts.on( "-a", "--archive-folder", "The folder in which archives should be stored; defaults to <folder>/../<folder-name>-archives." ) { |path| options[:archive_path] = path }
+          opts.on( "--no-archive", "Don't perform archival; typically if the files you're pruning are already compressed." ) { options[:archive] = false }
           opts.on_tail( "--version", "Displays version information." ) do 
             options[:did_work] = true
             puts "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
@@ -95,12 +101,19 @@ module Prune
         File.delete *paths
         "#{files.size} file(s) deleted"
       when :archive
-        groups = group_by_month folder_name, files
-        groups.each_pair do |month,files|
-          puts "TODO: Archive #{files.size} files for month #{month}"
+        if @options[:archive] then
+          archiver = Archiver.new( @options[:archive_path], folder_name, @options[:verbose] )
+          if archiver.ready? then
+            groups = group_by_month folder_name, files
+            groups.each_pair do |month,files|
+              archiver.archive( month, files )
+            end
+            sizes = groups.values.map { |x| x.size }.join( ', ' )
+            "#{groups.size} archive(s) created (#{sizes} file(s), respectively)"
+          else
+            puts "Archive folder #{archiver.destination} does not exist and cannot be created."
+          end
         end
-        sizes = groups.values.map { |x| x.size }.join( ', ' )
-        "#{groups.size} archive(s) created (#{sizes} file(s), respectively)"
       end
     end
     
@@ -182,6 +195,38 @@ module Prune
       
     end
   
+  end
+  
+  class Archiver
+    attr_reader :destination
+    
+    def initialize( destination, source, verbose )
+      @destination = destination || File.expand_path( File.join( source, '..', "#{source}-archives" ) )      
+      @source = source
+      @verbose = verbose
+    end
+    
+    def ready?
+      begin
+        Dir.mkdir @destination unless File.exists? @destination
+        return true
+      rescue SystemCallError
+        return false
+      end
+    end
+    
+    def archive( month, files )
+      month_name = Date::ABBR_MONTHNAMES[month]
+      archive_path = File.join( @destination, "archive-#{month_name}.tar.gz")
+      tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
+      paths = files.map { |file| File.join( @source, file ) }
+      
+      Minitar.pack( paths, tgz )
+      puts "Compressed #{files.size} file(s) into #{archive_path} archive." if @verbose
+      
+      File.delete( *paths )
+      puts "Removing #{files.size} compressed file(s)."
+    end
   end
 end
 
