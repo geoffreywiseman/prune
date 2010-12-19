@@ -155,7 +155,7 @@ module Prune
         :dir
       elsif @today - created < 14 then
         :recent
-      elsif @today.year == created.year && ( @today.month - created.month ) <= 0 then
+      elsif @today.year == created.year && ( @today.month - created.month ) <= 1 then
         # this month, last month
         created.wday == 5 ? :sparse : :remove
       else 
@@ -201,9 +201,16 @@ module Prune
     attr_reader :destination
     
     def initialize( destination, source, verbose )
-      @destination = destination || File.expand_path( File.join( source, '..', "#{source}-archives" ) )      
       @source = source
       @verbose = verbose
+      @destination = destination || get_default_dir      
+    end
+    
+    def get_default_dir
+      absolute = File.expand_path @source
+      path = File.dirname absolute
+      name = File.basename absolute
+      File.join( path, "${name}-archives" )
     end
     
     def ready?
