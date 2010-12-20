@@ -5,4 +5,21 @@ We have some nightly processes that archive information that we'd like to retain
 for possible restoration.  In order to keep space usage somewhat reasonable, we'd like to prune some of
 those files as they get older.  Prune satisfies that need.
 
-Prune is written as a Ruby shell script.
+Prune is written as a Ruby library with an optional command-line interface and a wrapping shell script.
+
+## Usage
+
+Although prune has a command-line interface, at the moment the retention policy which determines what to
+do with each of the files (retain, remove, archive) and how to take action (archiving files by month in 
+a .tar.gz) is basically hard-coded for our current needs, although it's easy to change.
+
+To invoke prune:
+
+	bin/prune <folder>
+	
+To get help on the various command-line options:
+
+	bin/prune --help
+
+In the long run, I expect this will be packaged as a gem and have the retention policy externalized
+where it can be configured for your own needs.
