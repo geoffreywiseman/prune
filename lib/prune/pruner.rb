@@ -36,19 +36,14 @@ module Prune
     end
     
     def execute_prune( folder_name, policy )
-      actions = 0
-      if @options[:prompt] && !prompt then
-        puts "Not proceeding; no actions taken."
-      else
-        @categories.each_pair do |category,files|
-          action = policy.action( category )
-          result = act( action, folder_name, files)
-          if !result.nil? then
-            puts result
-            actions += 1
-          end
+      begin
+        if @options[:prompt] && !prompt then
+          puts "Not proceeding; no actions taken."
+        else
+          take_all_actions( folder_name, policy )
         end
-        puts "No actions necessary." if actions == 0
+      rescue IOError
+          $stderr.print "ERROR: #{$!}\n"
       end
     end
     
@@ -58,25 +53,38 @@ module Prune
       return ['y','yes','true'].include? response
     end
     
-    def act( action, folder_name, files )
+    def take_all_actions( folder_name, policy )
+      actions = 0
+      @categories.each_pair do |category,files|
+        action = policy.action( category )
+        result = take_action( action, folder_name, files )
+        if !result.nil? then
+          puts result
+          actions += 1
+        end
+      end
+      puts "No actions necessary." if actions == 0
+    end
+    
+    def take_action( action, folder_name, files )
       case action
       when :remove
         paths = files.map { |file| File.join folder_name, file }
-        File.delete *paths
-        "#{files.size} file(s) deleted"
+        begin
+          File.delete *paths
+          "#{files.size} file(s) deleted"
+        rescue
+          raise IOError, "Could not remove file(s): #{$!}"
+        end
       when :archive
         if @options[:archive] then
           archiver = Archiver.new( @options[:archive_path], folder_name, @options[:verbose] )
-          if archiver.ready? then
-            groups = group_by_month folder_name, files
-            groups.each_pair do |month,files|
-              archiver.archive( month, files )
-            end
-            sizes = groups.values.map { |x| x.size }.join( ', ' )
-            "#{groups.size} archive(s) created (#{sizes} file(s), respectively)"
-          else
-            puts "Archive folder #{archiver.destination} does not exist and cannot be created."
+          groups = group_by_month folder_name, files
+          groups.each_pair do |month,files|
+            archiver.archive( month, files )
           end
+          sizes = groups.values.map { |x| x.size }.join( ', ' )
+          "#{groups.size} archive(s) created (#{sizes} file(s), respectively)"
         end
       end
     end

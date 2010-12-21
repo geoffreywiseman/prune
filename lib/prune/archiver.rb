@@ -20,19 +20,19 @@ module Prune
       absolute = File.expand_path @source
       path = File.dirname absolute
       name = File.basename absolute
-      File.join( path, "${name}-archives" )
+      File.join( path, "#{name}-archives" )
     end
     
-    def ready?
+    def make_destination
       begin
         Dir.mkdir @destination unless File.exists? @destination
-        return true
       rescue SystemCallError
-        return false
+        raise IOError, "Archive folder #{@destination} does not exist and cannot be created."
       end
     end
     
     def archive( month, files )
+      make_destination
       month_name = Date::ABBR_MONTHNAMES[month]
       archive_path = File.join( @destination, "archive-#{month_name}.tar.gz")
       tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
