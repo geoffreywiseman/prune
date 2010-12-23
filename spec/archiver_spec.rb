@@ -1,5 +1,4 @@
 require 'prune/archiver'
-#require 'fakefs'
 
 describe Prune::Archiver do
   
