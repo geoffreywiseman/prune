@@ -36,13 +36,13 @@ module Prune
       when :dir
         "Directories"
       when :recent
-        "Less Than 2 Weeks Old"
+        "Less than 2 Weeks Old"
       when :sparse
-        "Friday Older than Two Weeks"
+        "Friday Older than 2 Weeks"
       when :remove
-        "Non-Friday Older than Two Weeks"
+        "Non-Friday Older than 2 Weeks"
       when :old
-        "Older than Two Months"
+        "Older than 2 Months"
       end
     end
     
