@@ -9,6 +9,7 @@ include Archive::Tar
 module Prune
 
   class Pruner
+    attr_reader :categories
     
     def initialize( options )
       @options = options
@@ -17,7 +18,7 @@ module Prune
     end
     
     def prune( folder_name )
-      return puts( "ERROR: Cannot find folder: #{folder_name}" ) unless File.exists? folder_name
+      return print( "ERROR: Cannot find folder: #{folder_name}\n" ) unless File.exists? folder_name
       return puts( "ERROR: #{folder_name} is not a folder" ) unless File.directory? folder_name
       policy = RetentionPolicy.new folder_name
       analyze folder_name, policy
@@ -50,7 +51,7 @@ module Prune
     def prompt
       print "Proceed? [y/N]: "
       response = STDIN.gets.chomp.strip.downcase
-      return ['y','yes','true'].include? response
+      ['y','yes','true'].include? response
     end
     
     def take_all_actions( folder_name, policy )
