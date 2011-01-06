@@ -10,6 +10,7 @@ module Prune
 
   class Pruner
     attr_reader :categories
+    attr_reader :options
     
     def initialize( options )
       @options = options
@@ -26,7 +27,7 @@ module Prune
     end
     
     def analyze( folder_name, policy )
-      puts "Analyzing '#{folder_name}':"
+      print "Analyzing '#{folder_name}':\n"
       Dir.foreach folder_name do |file|
         analyze_file( policy, file )
       end
@@ -64,7 +65,7 @@ module Prune
           actions += 1
         end
       end
-      puts "No actions necessary." if actions == 0
+      print "No actions necessary.\n" if actions == 0
     end
     
     def take_action( action, folder_name, files )
