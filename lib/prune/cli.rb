@@ -10,18 +10,21 @@ module Prune
   VERSION = [1,0,0]
   
   class CommandLineInterface
+    
+    DEFAULT_OPTIONS = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true }
+    
     def self.parse_and_run
-      options = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true }
+      options = DEFAULT_OPTIONS.dup
       parser = OptionParser.new do |opts|
           opts.banner = "Usage: prune [options] folder"
           opts.on( "-v", "--verbose", "Prints much more frequently during execution about what it's doing." ) { options[:verbose] = true }
           opts.on( "-d", "--dry-run", "Categorizes files, but does not take any actions on them." ) { options[:dry_run] = true }
           opts.on( "-f", "--force", "--no-prompt", "Will take action without asking permissions; useful for automation." ) { options[:prompt] = false }
-          opts.on( "-a", "--archive-folder", "The folder in which archives should be stored; defaults to <folder>/../<folder-name>-archives." ) { |path| options[:archive_path] = path }
+          opts.on( "-a", "--archive-folder FOLDER", "The folder in which archives should be stored; defaults to <folder>/../<folder-name>-archives." ) { |path| options[:archive_path] = path }
           opts.on( "--no-archive", "Don't perform archival; typically if the files you're pruning are already compressed." ) { options[:archive] = false }
           opts.on_tail( "--version", "Displays version information." ) do 
             options[:did_work] = true
-            puts "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
+            print "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
           end
           opts.on_tail( "-?", "--help", "Shows quick help about using prune." ) do
             options[:did_work] = true
@@ -31,16 +34,16 @@ module Prune
 
       begin
         parser.parse!
+
+        if ARGV.size != 1 then
+          print parser.help unless options[:did_work]
+        else
+          Pruner.new( options ).prune( ARGV.first )
+        end
       rescue OptionParser::ParseError
         $stderr.print "Error: " + $! + "\n"
-        exit
       end
       
-      if ARGV.size != 1 then
-        print parser.help unless options[:did_work]
-      else
-        Pruner.new( options ).prune( ARGV.first )
-      end
     end
   end
 
