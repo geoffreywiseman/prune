@@ -15,6 +15,7 @@ describe Prune::CommandLineInterface do
   describe "with no arguments" do
     
     it "should print help" do
+      ARGV.clear
       Prune::CommandLineInterface::parse_and_run
       @messages.should include_match( USAGE_TEXT )
     end

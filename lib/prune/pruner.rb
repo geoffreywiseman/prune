@@ -81,23 +81,11 @@ module Prune
       when :archive
         if @options[:archive] then
           archiver = Archiver.new( @options[:archive_path], folder_name, @options[:verbose] )
-          groups = group_by_month folder_name, files
-          groups.each_pair do |month,files|
-            archiver.archive( month, files )
-          end
-          sizes = groups.values.map { |x| x.size }.join( ', ' )
-          "#{groups.size} archive(s) created (#{sizes} file(s), respectively)"
+          grouper = ArchiveGrouper.new( archiver )
+          grouper.group( folder_name, files );
+          grouper.archive
         end
       end
-    end
-    
-    def group_by_month( folder_name, files )
-      groups = Hash.new { |h,k| h[k] = [] }
-      files.each do |file|
-        month = File.mtime( File.join( folder_name, file ) ).month
-        groups[ month ] << file
-      end
-      return groups
     end
     
     def display_categories( policy )

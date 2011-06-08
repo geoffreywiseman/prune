@@ -31,12 +31,12 @@ describe Prune::Archiver do
       archive_file = double "file"
       gz = double "GzipWriter"
       paths = [ "/mysql/a", "/mysql/b", "/mysql/c" ]
-      File.stub( :open ).with( "#{DESTINATION}/archive-May.tar.gz", 'wb' ) { :archive_file }
+      File.stub( :open ).with( "#{DESTINATION}/archive-May-2011.tar.gz", 'wb' ) { :archive_file }
       Zlib::GzipWriter.stub( :new ) { gz }
       Minitar.stub( :pack ).with( paths, gz )
       File.stub( :delete ).with( *paths )
       
-      subject.archive 5, ["a", "b", "c"] 
+      subject.archive "May-2011", ["a", "b", "c"] 
     end
     
     describe "and a /mysql/archives destination" do

@@ -31,10 +31,9 @@ module Prune
       end
     end
     
-    def archive( month, files )
+    def archive( group_name, files )
       make_destination
-      month_name = Date::ABBR_MONTHNAMES[month]
-      archive_path = File.join( @destination, "archive-#{month_name}.tar.gz")
+      archive_path = File.join( @destination, "archive-#{group_name}.tar.gz")
       tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
       paths = files.map { |file| File.join( @source, file ) }
       
@@ -42,7 +41,7 @@ module Prune
       puts "Compressed #{files.size} file(s) into #{archive_path} archive." if @verbose
       
       File.delete( *paths )
-      puts "Removing #{files.size} compressed file(s)."
+      puts "Removing #{files.size} compressed file(s)." if @verbose
     end
   end
 end
