@@ -23,7 +23,7 @@ module Prune
       File.join( path, "#{name}-archives" )
     end
     
-    def make_destination
+    def make_destination_dir
       begin
         Dir.mkdir @destination unless File.exists? @destination
       rescue SystemCallError
@@ -32,16 +32,30 @@ module Prune
     end
     
     def archive( group_name, files )
-      make_destination
+      make_destination_dir
       archive_path = File.join( @destination, "archive-#{group_name}.tar.gz")
-      tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
       paths = files.map { |file| File.join( @source, file ) }
       
-      Minitar.pack( paths, tgz )
-      puts "Compressed #{files.size} file(s) into #{archive_path} archive." if @verbose
+      if File.exists?( archive_path ) then
+        puts "Archive file #{archive_path} exists." if @verbose
+        Dir.mktmpdir do |tmp_dir|
+          puts "Created temporary directory #{tmp_dir} to extract contents of existing archive file." if @verbose
+          tgz = Zlib::GzipReader.new( File.open( archive_path, 'rb' ) )
+          Minitar.unpack( tgz, tmp_dir )
+          extracted_paths = Dir.entries( tmp_dir ).map { |tmpfile| File.join( tmp_dir, tmpfile ) }.reject { |path| File.directory? path }
+          combined_paths = extracted_paths + paths
+          tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
+          Minitar.pack( combined_paths, tgz )
+          puts "Added #{files.size} file(s) to #{archive_path} archive already containing #{extracted_paths.size} file(s)." if @verbose
+        end
+      else
+        tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
+        Minitar.pack( paths, tgz )
+        puts "Compressed #{files.size} file(s) into #{archive_path} archive." if @verbose
+      end
       
       File.delete( *paths )
-      puts "Removing #{files.size} compressed file(s)." if @verbose
+      puts "Removing #{files.size} source files that have been archived." if @verbose
     end
   end
 end
