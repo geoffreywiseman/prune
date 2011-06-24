@@ -35,7 +35,6 @@ module Prune
       begin
         parser.parse!
 
-        puts "**ARGV: #{ARGV}**"
         if ARGV.size != 1 then
           print parser.help unless options[:did_work]
         else
