@@ -81,7 +81,7 @@ module Prune
       when :archive
         if @options[:archive] then
           archiver = Archiver.new( @options[:archive_path], folder_name, @options[:verbose] )
-          grouper = ArchiveGrouper.new( archiver )
+          grouper = Grouper.new( archiver )
           grouper.group( folder_name, files );
           grouper.archive
         end
