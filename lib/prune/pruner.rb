@@ -28,7 +28,7 @@ module Prune
     
     def analyze( folder_name, policy )
       print "Analyzing '#{folder_name}':\n"
-      files = Dir.entries( folder_name ).sort_by { |f| test(?M, f) } 
+      files = Dir.entries( folder_name ).sort_by { |f| test(?M, File.join( folder_name, f ) ) } 
       files.each do |file|
         analyze_file( policy, file )
       end
@@ -91,7 +91,7 @@ module Prune
     
     def display_categories( policy )
       @categories.each_pair do |category,files|
-        print "\t#{policy.describe category} (#{policy.action category}):\n\t\t"
+        print "\t#{policy.action( category).to_s.capitalize} '#{policy.describe category}':\n\t\t"
         puts files.join( "\n\t\t")
       end
     end

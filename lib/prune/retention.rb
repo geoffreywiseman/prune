@@ -40,9 +40,9 @@ module Prune
       when :sparse
         "Friday Older than 2 Weeks"
       when :remove
-        "Non-Friday Older than 2 Weeks"
+        "Older than 2 Weeks, Not Friday"
       when :old
-        "Older than 2 Months"
+        "Friday Older than 2 Months"
       end
     end
     

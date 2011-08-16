@@ -139,7 +139,7 @@ describe Prune::Pruner do
     File.stub( :exists? ).with( PRUNE_PATH ) { true }
     File.stub( :directory? ).with( PRUNE_PATH ) { true }
     Dir.stub( :entries ).with( PRUNE_PATH ) { files }
-    files.each_index { |index| subject.stub(:test).with( ?M, files[index] ) { index }  } 
+    files.each_index { |index| subject.stub(:test).with( ?M, File.join( PRUNE_PATH, files[index] ) ) { index }  } 
   end
   
   def stub_messages
