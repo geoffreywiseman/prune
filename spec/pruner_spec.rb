@@ -8,7 +8,7 @@ describe Prune::Pruner do
   subject { Prune::Pruner.new Hash.new }
   
   before( :each ) do 
-    @retention_policy = double
+    @retention_policy = double( "RetentionPolicy" )
     Prune::RetentionPolicy.stub( :new ) { @retention_policy }
   end  
   
@@ -28,32 +28,49 @@ describe Prune::Pruner do
       
       before( :each ) do
         stub_files
+        stub_messages
+        subject.prune PRUNE_PATH
       end
       
       it "should not invoke the retention policy" do
         @retention_policy.should_not_receive( :categorize )
+      end
+
+      it "should print 'Analyzing #{PRUNE_PATH}'" do
+        @messages.should include("Analyzing '#{PRUNE_PATH}':\n")
+      end
+      
+      it "should say no action was required" do
+        @messages.should include("No actions necessary.\n")
+      end
+
+      it "should say no files were analyzed" do
+        @messages.should include_match( /0 file\(s\) analyzed/ )
+      end
+
+    end
+    
+    context "with two files" do
+      
+      before( :each ) do
+        stub_files "beta.txt", "alpha.txt"
+        stub_messages
+      end
+      
+      it "should categorize each file in modified order" do
+        @retention_policy.should_receive( :categorize ).with( 'beta.txt' ).ordered
+        @retention_policy.should_receive( :categorize ).with( 'alpha.txt' ).ordered
         subject.prune PRUNE_PATH
       end
-
-      describe "printed messages" do
-        before( :all ) do
-          stub_files
-          @messages = []
-          $stdout.stub( :write ) { |message| @messages << message  }
-          subject.prune PRUNE_PATH
-        end
-        
-        it "should say no action was required" do
-          @messages.should include("Analyzing '#{PRUNE_PATH}':\n")
-        end
-
-        it "should say no files were analyzed" do
-          @messages.should include_match( /0 file\(s\) analyzed/ )
-        end
-
+      
+      it "should say two files were analyzed" do
+        @retention_policy.as_null_object
+        subject.prune PRUNE_PATH
+        @messages.should include_match( /2 file\(s\) analyzed/ )
       end
-    
+      
     end
+    
   end
   
   describe "Confirmation Prompt" do
@@ -118,10 +135,16 @@ describe Prune::Pruner do
         
   end
   
-  def stub_files(*files)
+  def stub_files( *files )
     File.stub( :exists? ).with( PRUNE_PATH ) { true }
     File.stub( :directory? ).with( PRUNE_PATH ) { true }
-    Dir.stub( :foreach ).with( PRUNE_PATH ) { files }
+    Dir.stub( :entries ).with( PRUNE_PATH ) { files }
+    files.each_index { |index| subject.stub(:test).with( ?M, files[index] ) { index }  } 
+  end
+  
+  def stub_messages
+    @messages = []
+    $stdout.stub( :write ) { |message| @messages << message  }
   end
   
 end

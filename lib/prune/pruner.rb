@@ -28,7 +28,8 @@ module Prune
     
     def analyze( folder_name, policy )
       print "Analyzing '#{folder_name}':\n"
-      Dir.foreach folder_name do |file|
+      files = Dir.entries( folder_name ).sort_by { |f| test(?M, f) } 
+      files.each do |file|
         analyze_file( policy, file )
       end
       print "\n" if @options[:verbose]
