@@ -1,6 +1,7 @@
 require 'prune/grouper'
 require 'prune/retention'
 require 'spec_helper'
+require 'rspec'
 
 describe "Prune::Grouper" do
   

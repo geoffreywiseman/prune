@@ -1,5 +1,6 @@
 require 'prune/archiver'
 require 'tmpdir'
+require 'rspec'
 
 describe Prune::Archiver do
   SOURCE='/mysql'

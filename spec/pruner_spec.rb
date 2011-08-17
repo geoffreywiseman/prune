@@ -1,6 +1,7 @@
 require 'prune/pruner'
 require 'prune/retention'
 require 'spec_helper'
+require 'rspec'
 
 describe Prune::Pruner do
   

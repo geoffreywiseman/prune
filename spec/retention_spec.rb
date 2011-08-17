@@ -1,5 +1,6 @@
 require 'prune/retention'
-#require 'spec/spec_helper'
+require 'rspec'
+require 'spec/spec_helper'
 
 DAY = 24 * 60 * 60
 

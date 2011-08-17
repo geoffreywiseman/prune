@@ -1,9 +1,11 @@
 require 'prune/cli'
 require 'prune/pruner'
 require 'spec_helper'
+require 'rspec'
 
 describe Prune::CommandLineInterface do
   USAGE_TEXT = /Usage: prune \[options\] folder/
+  ARCHIVE_PATH = "/prune/fake/archive-path"
   
   before(:each) do
     @messages = []
@@ -97,7 +99,6 @@ describe Prune::CommandLineInterface do
       end
       
       describe "with a folder name" do
-        ARCHIVE_PATH = "/prune/fake/archive-path"
         it "should set the archive_path option to the folder" do
           assert_arg_to_option ARCHIVE_PATH, :archive_path => ARCHIVE_PATH
         end
@@ -118,7 +119,6 @@ describe Prune::CommandLineInterface do
       end
       
       describe "with a folder name" do
-        ARCHIVE_PATH = "/prune/fake/archive-path"
         it "should set the archive_path option to the folder" do
           assert_arg_to_option ARCHIVE_PATH, :archive_path => ARCHIVE_PATH
         end
