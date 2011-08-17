@@ -55,9 +55,9 @@ describe Prune::RetentionPolicy do
         subject.categorize( SOURCE_FILE ).should eq( :remove )
       end
       
-      it "should be described as 'Non-Friday, Older than Two Weeks'" do
+      it "should be described as 'Older than Two Weeks' and 'Not Friday'" do
         description = subject.describe :remove
-        description.should include 'Non-Friday'
+        description.should include 'Not Friday'
         description.should include 'Older than 2 Weeks'
       end
       
@@ -75,7 +75,7 @@ describe Prune::RetentionPolicy do
         subject.categorize( SOURCE_FILE ).should eq( :sparse )
       end
       
-      it "should be described as 'Friday Older than Two Weeks'" do
+      it "should be described as 'Friday Older than 2 Weeks'" do
         subject.describe( :sparse ).should eq( 'Friday Older than 2 Weeks' )
       end
       
@@ -93,8 +93,8 @@ describe Prune::RetentionPolicy do
         subject.categorize( SOURCE_FILE ).should eq( :old )
       end
       
-      it "should be described as 'Older than Two Weeks'" do
-        subject.describe( :old ).should eq( 'Older than 2 Months' )
+      it "should be described as 'Friday Older than 2 Months'" do
+        subject.describe( :old ).should eq( 'Friday Older than 2 Months' )
       end
 
       it "should invoke action :remove" do 

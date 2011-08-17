@@ -60,6 +60,17 @@ module Prune
         :archive
       end
     end
+    
+    def requires_prompt?( category ) 
+      case action( category )
+      when :remove
+        true
+      when :archive
+        true
+      else
+        false
+      end
+    end
   
   end
   

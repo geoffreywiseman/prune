@@ -40,7 +40,7 @@ module Prune
     
     def execute_prune( folder_name, policy )
       begin
-        if @options[:prompt] && !prompt then
+        if should_prompt?( policy ) && !prompt then
           puts "Not proceeding; no actions taken."
         else
           take_all_actions( folder_name, policy )
@@ -48,6 +48,14 @@ module Prune
       rescue IOError
           $stderr.print "ERROR: #{$!}\n"
       end
+    end
+    
+    def should_prompt?( policy )
+      @options[:prompt] && actions_require_prompt( policy )
+    end
+    
+    def actions_require_prompt( policy )
+      @categories.keys.any? { |category| policy.requires_prompt? category }
     end
     
     def prompt
