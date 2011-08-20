@@ -1,5 +1,7 @@
 require 'prune/pruner'
 require 'prune/retention'
+require 'prune/grouper'
+require 'prune/archiver'
 require 'spec_helper'
 require 'rspec'
 
@@ -51,25 +53,62 @@ describe Prune::Pruner do
 
     end
     
-    context "with two files" do
+    context "with three files" do
+      ONE_DAY = 86400
       
       before( :each ) do
-        stub_files "beta.txt", "alpha.txt"
+        stub_files "beta.txt" => Time.now - ONE_DAY, "alpha.txt" => Time.now - 3*ONE_DAY, "gamma.txt" => Time.now
         stub_messages
       end
       
       it "should categorize each file in modified order" do
-        @retention_policy.should_receive( :categorize ).with( 'beta.txt' ).ordered
         @retention_policy.should_receive( :categorize ).with( 'alpha.txt' ).ordered
+        @retention_policy.should_receive( :categorize ).with( 'beta.txt' ).ordered
+        @retention_policy.should_receive( :categorize ).with( 'gamma.txt' ).ordered
         subject.prune PRUNE_PATH
       end
       
-      it "should say two files were analyzed" do
+      it "should say three files were analyzed" do
         @retention_policy.as_null_object
         subject.prune PRUNE_PATH
-        @messages.should include_match( /2 file\(s\) analyzed/ )
+        @messages.should include_match( /3 file\(s\) analyzed/ )
       end
       
+    end
+    
+    context "with file categorized as :remove" do
+      it "should delete file" do
+        filename = 'delete-me.txt'
+        stub_files filename
+        @retention_policy.should_receive( :categorize ).with( filename ) { :old }
+        @retention_policy.stub( :action ).with( :old ) { :remove }
+        @retention_policy.stub( :describe ).with( :old ) { "Old" }
+        File.should_receive( :delete ).with( File.join( PRUNE_PATH, filename ) )
+        subject.prune PRUNE_PATH
+      end
+    end
+    
+    context "with files categorized as :archive" do
+      let!(:files) { [ 'one.tar.gz', 'two.tar.gz', 'three.tar.gz' ] }
+      
+      before do
+        subject.options[:archive] = true
+        stub_files files
+      end
+      
+      it "should archive files in groups" do
+        @retention_policy.stub( :categorize ) { :ancient }
+        @retention_policy.stub( :action ).with( :ancient ) { :archive }
+        @retention_policy.stub( :describe ).with( :ancient ) { "Ancient" }
+        # @retention_policy.stub( : )
+
+        grouper = double( "Grouper" )
+        Prune::Grouper.stub( :new ) { grouper }
+        grouper.should_receive( :group ).with( PRUNE_PATH, files )
+        grouper.should_receive( :archive ) { "2 Archives created." }
+        
+        subject.prune PRUNE_PATH
+      end
     end
     
   end
@@ -136,11 +175,24 @@ describe Prune::Pruner do
         
   end
   
-  def stub_files( *files )
+  def stub_files( files = nil )
     File.stub( :exists? ).with( PRUNE_PATH ) { true }
     File.stub( :directory? ).with( PRUNE_PATH ) { true }
-    Dir.stub( :entries ).with( PRUNE_PATH ) { files }
-    files.each_index { |index| subject.stub(:test).with( ?M, File.join( PRUNE_PATH, files[index] ) ) { index }  } 
+    case files
+    when nil
+      Dir.stub( :entries ).with( PRUNE_PATH ) { Array.new }
+    when String
+      subject.stub(:test).with( ?M, File.join( PRUNE_PATH, files ) ) { Time.now }
+      Dir.stub( :entries ).with( PRUNE_PATH ) { [ files ] }
+    when Array
+      files.each_index { |index| subject.stub(:test).with( ?M, File.join( PRUNE_PATH, files[index] ) ) { index }  } 
+      Dir.stub( :entries ).with( PRUNE_PATH ) { files }
+    when Hash
+      files.each_key { |key| subject.stub(:test).with( ?M, File.join( PRUNE_PATH, key ) ) { files[key] } }
+      Dir.stub( :entries ).with( PRUNE_PATH ) { files.keys }
+    else
+      raise "Don't know how to stub files for #{files.class}"
+    end
   end
   
   def stub_messages

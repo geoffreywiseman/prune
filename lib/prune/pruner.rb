@@ -93,13 +93,15 @@ module Prune
           grouper = Grouper.new( archiver )
           grouper.group( folder_name, files );
           grouper.archive
+        else
+          "Archive option disabled. Archive(s) not created."
         end
       end
     end
     
     def display_categories( policy )
       @categories.each_pair do |category,files|
-        print "\t#{policy.action( category).to_s.capitalize} '#{policy.describe category}':\n\t\t"
+        print "\t#{policy.action( category ).to_s.capitalize} '#{policy.describe category}':\n\t\t"
         puts files.join( "\n\t\t")
       end
     end

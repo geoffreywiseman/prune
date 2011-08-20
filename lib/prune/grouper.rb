@@ -21,7 +21,7 @@ module Prune
         @archiver.archive( month, files )
       end
       sizes = @groups.values.map { |x| x.size }.join( ', ' )
-      puts "#{@groups.size} archive(s) created (#{sizes} file(s), respectively)"
+      "#{@groups.size} archive(s) created (#{sizes} file(s), respectively)"
     end
   end
 end
