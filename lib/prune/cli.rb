@@ -8,11 +8,11 @@ include Archive::Tar
 
 module Prune
   VERSION = [1,0,0]
-  
+
   class CommandLineInterface
-    
+
     DEFAULT_OPTIONS = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true }
-    
+
     def self.parse_and_run
       options = DEFAULT_OPTIONS.dup
       parser = OptionParser.new do |opts|
@@ -22,7 +22,7 @@ module Prune
           opts.on( "-f", "--force", "--no-prompt", "Will take action without asking permissions; useful for automation." ) { options[:prompt] = false }
           opts.on( "-a", "--archive-folder FOLDER", "The folder in which archives should be stored; defaults to <folder>/../<folder-name>-archives." ) { |path| options[:archive_path] = path }
           opts.on( "--no-archive", "Don't perform archival; typically if the files you're pruning are already compressed." ) { options[:archive] = false }
-          opts.on_tail( "--version", "Displays version information." ) do 
+          opts.on_tail( "--version", "Displays version information." ) do
             options[:did_work] = true
             print "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
           end
@@ -43,7 +43,7 @@ module Prune
       rescue OptionParser::ParseError
         $stderr.print "Error: " + $! + "\n"
       end
-      
+
     end
   end
 

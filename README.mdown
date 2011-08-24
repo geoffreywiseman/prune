@@ -1,6 +1,6 @@
 # Prune:  Deleting and archiving files by date
 
-We have some nightly processes that archive information that we'd like to retain, either for reference or 
+We have some nightly processes that archive information that we'd like to retain, either for reference or
 for possible restoration.  In order to keep space usage somewhat reasonable, we'd like to prune some of
 those files as they get older.  Prune satisfies that need.
 
@@ -9,13 +9,13 @@ Prune is written as a Ruby library with an optional command-line interface and a
 ## Usage
 
 Although prune has a command-line interface, at the moment the retention policy which determines what to
-do with each of the files (retain, remove, archive) and how to take action (archiving files by month in 
+do with each of the files (retain, remove, archive) and how to take action (archiving files by month in
 a .tar.gz) is basically hard-coded for our current needs, although it's easy to change.
 
 To invoke prune:
 
 	bin/prune <folder>
-	
+
 To get help on the various command-line options:
 
 	bin/prune --help

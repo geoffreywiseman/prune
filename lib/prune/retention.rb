@@ -9,12 +9,12 @@ include Archive::Tar
 module Prune
 
   class RetentionPolicy
-  
+
     def initialize( folder_name )
       @folder_name = folder_name
       @today = Date.today
     end
-  
+
     def categorize( file_name )
       path = File.join( @folder_name, file_name )
       created = Date.parse(File.mtime(path).strftime('%Y/%m/%d'))
@@ -25,12 +25,12 @@ module Prune
       elsif @today.year == created.year && ( @today.month - created.month ) <= 1 then
         # this month, last month
         created.wday == 5 ? :sparse : :remove
-      else 
+      else
         # earlier month
         created.wday == 5 ? :old : :remove
       end
     end
-    
+
     def describe( category )
       case category
       when :dir
@@ -45,7 +45,7 @@ module Prune
         "Friday Older than 2 Months"
       end
     end
-    
+
     def action( category )
       case category
       when :dir
@@ -60,8 +60,8 @@ module Prune
         :archive
       end
     end
-    
-    def requires_prompt?( category ) 
+
+    def requires_prompt?( category )
       case action( category )
       when :remove
         true
@@ -71,7 +71,7 @@ module Prune
         false
       end
     end
-  
+
   end
-  
+
 end
