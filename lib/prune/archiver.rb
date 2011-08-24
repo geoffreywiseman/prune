@@ -9,20 +9,20 @@ include Archive::Tar
 module Prune
   class Archiver
     attr_reader :destination
-    
+
     def initialize( destination, source, verbose )
       @source = source
       @verbose = verbose
-      @destination = destination || get_default_dir      
+      @destination = destination || get_default_dir
     end
-    
+
     def get_default_dir
       absolute = File.expand_path @source
       path = File.dirname absolute
       name = File.basename absolute
       File.join( path, "#{name}-archives" )
     end
-    
+
     def make_destination_dir
       begin
         Dir.mkdir @destination unless File.exists? @destination
@@ -30,12 +30,12 @@ module Prune
         raise IOError, "Archive folder #{@destination} does not exist and cannot be created."
       end
     end
-    
+
     def archive( group_name, files )
       make_destination_dir
       archive_path = File.join( @destination, "archive-#{group_name}.tar.gz")
       paths = files.map { |file| File.join( @source, file ) }
-      
+
       if File.exists?( archive_path ) then
         puts "Archive file #{archive_path} exists." if @verbose
         Dir.mktmpdir do |tmp_dir|
@@ -53,7 +53,7 @@ module Prune
         Minitar.pack( paths, tgz )
         puts "Compressed #{files.size} file(s) into #{archive_path} archive." if @verbose
       end
-      
+
       File.delete( *paths )
       puts "Removing #{files.size} source files that have been archived." if @verbose
     end

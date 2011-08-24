@@ -1,6 +1,6 @@
 module Prune
   class Grouper
-    
+
     def initialize( archiver )
       @groups = Hash.new{ |h,k| h[k] = [] }
       @archiver = archiver
@@ -15,7 +15,7 @@ module Prune
       end
       return self
     end
-    
+
     def archive
       @groups.each_pair do |month,files|
         @archiver.archive( month, files )
