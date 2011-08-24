@@ -49,3 +49,8 @@ ul.menu {
 	font-size: 20px;
 	font-family: Helvetica, Arial, sans;
 }
+.highlight {
+	border: 1px solid black;
+	padding-left: 10px;
+	font-size: 12px;
+}
