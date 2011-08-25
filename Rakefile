@@ -1,4 +1,5 @@
 require 'rake/clean'
+require 'rake/packagetask'
 require 'rspec/core/rake_task'
 require 'rspec'
 
@@ -16,4 +17,8 @@ RSpec::Core::RakeTask.new(:coverage) do |t|
   t.rcov_opts = ['--exclude', 'spec,/gems/,/rubygems/', '--text-report']
 end
 
-desc "Clean out any generated files"
+Rake::PackageTask.new( "prune", "1.0" ) do |p|
+  p.need_tar_gz = true
+  p.need_zip = true
+  p.package_files.include( '{bin,lib,spec}/**/*', 'Rakefile', 'README.mdown', 'UNLICENSE' )
+end
