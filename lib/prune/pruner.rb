@@ -46,7 +46,7 @@ module Prune
           take_all_actions( folder_name, policy )
         end
       rescue IOError
-          $stderr.print "ERROR: #{$!}\n"
+        $stderr.print "ERROR: #{$!}\n"
       end
     end
 
