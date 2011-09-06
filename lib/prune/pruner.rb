@@ -55,7 +55,7 @@ module Prune
     end
 
     def actions_require_prompt( policy )
-      @categories.keys.any? { |category| policy.requires_prompt? category }
+      @categories.keys.any? { |category| category.requires_prompt? }
     end
 
     def prompt
@@ -67,7 +67,7 @@ module Prune
     def take_all_actions( folder_name, policy )
       actions = 0
       @categories.each_pair do |category,files|
-        action = policy.action( category )
+        action = category.action
         result = take_action( action, folder_name, files )
         if !result.nil? then
           puts result
@@ -101,7 +101,7 @@ module Prune
 
     def display_categories( policy )
       @categories.each_pair do |category,files|
-        print "\t#{policy.action( category ).to_s.capitalize} '#{policy.describe category}':\n\t\t"
+        print "\t#{category.description}:\n\t\t"
         puts files.join( "\n\t\t")
       end
     end
