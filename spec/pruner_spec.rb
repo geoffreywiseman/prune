@@ -80,9 +80,12 @@ describe Prune::Pruner do
       it "should delete file" do
         filename = 'delete-me.txt'
         stub_files filename
-        @retention_policy.should_receive( :categorize ).with( filename ) { :old }
-        @retention_policy.stub( :action ).with( :old ) { :remove }
-        @retention_policy.stub( :describe ).with( :old ) { "Old" }
+        
+        category = double( category )
+        category.stub( :description ) { "Old" }
+        category.stub( :action ) { :remove }
+        
+        @retention_policy.should_receive( :categorize ).with( filename ) { category }
         File.should_receive( :delete ).with( File.join( PRUNE_PATH, filename ) )
         subject.prune PRUNE_PATH
       end
@@ -97,10 +100,10 @@ describe Prune::Pruner do
       end
 
       it "should archive files in groups" do
-        @retention_policy.stub( :categorize ) { :ancient }
-        @retention_policy.stub( :action ).with( :ancient ) { :archive }
-        @retention_policy.stub( :describe ).with( :ancient ) { "Ancient" }
-        # @retention_policy.stub( : )
+        category = double( "category" )
+        @retention_policy.stub( :categorize ) { category }
+        category.stub( :action ) { :archive }
+        category.stub( :description ) { "Ancient" }
 
         grouper = double( "Grouper" )
         Prune::Grouper.stub( :new ) { grouper }
