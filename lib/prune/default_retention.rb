@@ -9,6 +9,7 @@ end
 category "Ignoring directories" do
   match { |file| File.directory?(file.name) }
   ignore
+  quiet
 end
 
 category "Retaining Files from the Last Two Weeks" do

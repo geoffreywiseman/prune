@@ -101,8 +101,10 @@ module Prune
 
     def display_categories( policy )
       @categories.each_pair do |category,files|
-        print "\t#{category.description}:\n\t\t"
-        puts files.join( "\n\t\t")
+        if !category.quiet? || @options[:verbose] then 
+          print "\t#{category.description}:\n\t\t"
+          puts files.join( "\n\t\t")
+        end
       end
     end
 
@@ -110,7 +112,6 @@ module Prune
       category = policy.categorize( file )
       @categories[ category ] << file unless category.nil?
       @analyzed_count += 1
-      print "\t#{file} -> #{category}\n" if @options[:verbose]
     end
   end
 

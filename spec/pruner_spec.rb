@@ -84,6 +84,7 @@ describe Prune::Pruner do
         category = double( category )
         category.stub( :description ) { "Old" }
         category.stub( :action ) { :remove }
+        category.stub( :quiet? ) { false }
         
         @retention_policy.should_receive( :categorize ).with( filename ) { category }
         File.should_receive( :delete ).with( File.join( PRUNE_PATH, filename ) )
@@ -104,7 +105,8 @@ describe Prune::Pruner do
         @retention_policy.stub( :categorize ) { category }
         category.stub( :action ) { :archive }
         category.stub( :description ) { "Ancient" }
-
+        category.stub( :quiet? ) { false }
+        
         grouper = double( "Grouper" )
         Prune::Grouper.stub( :new ) { grouper }
         grouper.should_receive( :group ).with( PRUNE_PATH, files )

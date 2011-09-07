@@ -10,7 +10,7 @@ module Prune
       @folder_name = folder_name
       @today = Date.today
       @categories = Array.new
-      @default_category = Category.new "Unmatched Files", :retain
+      @default_category = Category.new "Unmatched Files", :retain, true
       instance_eval *get_retention_dsl
       raise "No categories defined." if @categories.empty?
     end
@@ -40,6 +40,7 @@ module Prune
     
     def initialize( description )
       @description = description
+      @quiet = false
     end
     
     def build
@@ -48,7 +49,7 @@ module Prune
       elsif @action.nil? then
         raise "Category #{@description} has no action defined."
       end
-      Category.new( @description, @action, @predicate )
+      Category.new( @description, @action, @quiet, @predicate )
     end
     
     def match( &block )
@@ -69,6 +70,10 @@ module Prune
     
     def remove
       @action = :remove
+    end
+    
+    def quiet
+      @quiet = true
     end
     
   end
