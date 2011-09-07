@@ -5,7 +5,9 @@ require 'date'
 module Prune
 
   class RetentionPolicy
-
+    
+    attr_accessor :categories
+    
     def initialize( folder_name )
       @folder_name = folder_name
       @today = Date.today

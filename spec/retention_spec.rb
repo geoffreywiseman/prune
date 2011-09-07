@@ -14,6 +14,16 @@ describe Prune::RetentionPolicy do
   subject { Prune::RetentionPolicy.new SOURCE_DIR }
 
   describe "default retention policy" do
+    
+    it "should return categories in dsl order" do
+      cats = subject.categories
+      cats.shift.description.should include( "Ignoring directories" )
+      cats.shift.description.should include( "from the Last Two Weeks" )
+      cats.shift.description.should include( "Retaining 'Friday'" )
+      cats.shift.description.should include( "Removing 'Non-Friday'" )
+      cats.shift.description.should include( "Archiving" )
+      cats.should be_empty
+    end
   
     describe "analyzing a directory" do
       let( :dircat ) do

@@ -22,6 +22,7 @@ module Prune
       return print( "ERROR: Cannot find folder: #{folder_name}\n" ) unless File.exists? folder_name
       return puts( "ERROR: #{folder_name} is not a folder" ) unless File.directory? folder_name
       policy = RetentionPolicy.new folder_name
+      policy.categories.each { |cat| @categories[cat] = Array.new } # retain category order
       analyze folder_name, policy
       execute_prune( folder_name, policy ) unless @options[:dry_run]
     end
