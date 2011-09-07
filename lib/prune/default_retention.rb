@@ -18,17 +18,17 @@ category "Retaining Files from the Last Two Weeks" do
   retain
 end
 
-category "Retaining 'Friday' Files in Last Two Months" do
+category "Retaining 'Friday' files Older than Two Weeks" do
   match { |file| file.modified_time.wday == 5 && file.months_since_modified < 2 && file.days_since_modified > 14 }
   retain
 end
 
-category "Removing Non-Friday Files Older Than Two Weeks" do
+category "Removing 'Non-Friday' files Older than Two Weeks" do
   match { |file| file.modified_time.wday != 5 && file.days_since_modified > 14 }
   remove 
 end
 
-category "Archiving Files Order than Last Two Months" do 
+category "Archiving Files Older than Two Months" do 
   match { |file| file.modified_time.wday == 5 && file.months_since_modified >= 2 }
   archive
 end

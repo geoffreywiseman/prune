@@ -1,4 +1,5 @@
 require 'prune/retention'
+require 'prune/category'
 require 'rspec'
 require 'spec/spec_helper'
 
@@ -12,96 +13,118 @@ describe Prune::RetentionPolicy do
 
   subject { Prune::RetentionPolicy.new SOURCE_DIR }
 
-  describe "analyzing a directory" do
-
-    it "should be categorized as :dir" do
-      File.stub( :directory? ).with( SOURCE_PATH ) { true }
-      File.stub( :mtime ).with( SOURCE_PATH ) { Time.now }
-      subject.categorize( SOURCE_FILE ).should eq( :dir )
-    end
-
-    it "should be described as 'Directories'" do
-      subject.describe( :dir ).should include( 'Directories' )
-    end
-
-    it "should invoke action :ignore" do
-      subject.action( :dir ).should eq( :ignore )
-    end
-  end
-
-  describe "analyzing a file" do
-
-    describe "created yesterday" do
-
-      it "should be categorized as :recent" do
-        File.stub( :directory? ).with( SOURCE_PATH ) { false }
-        File.stub( :mtime ).with( SOURCE_PATH ) { Time.now - DAY }
-        subject.categorize( SOURCE_FILE ).should eq( :recent )
+  describe "default retention policy" do
+  
+    describe "analyzing a directory" do
+      let( :dircat ) do
+        File.stub( :directory? ).with( SOURCE_PATH ) { true }
+        File.stub( :mtime ).with( SOURCE_PATH ) { Time.now }
+        subject.categorize( SOURCE_FILE )
+      end
+      
+      
+      it "should be categorized as 'Ignoring directories'" do
+        dircat.description.should eq( "Ignoring directories" )
       end
 
-      it "should be described as 'Less than 2 Weeks'" do
-        subject.describe( :recent ).should include( 'Less than 2 Weeks' )
-      end
-
-      it "should invoke action :retain" do
-        subject.action( :recent ).should eq( :retain )
+      it "should invoke action :ignore" do
+        dircat.action.should eq( :ignore )
       end
     end
 
-    describe "created three weeks ago, wednesday" do
+    describe "analyzing a file" do
 
-      it "should be categorized as :remove" do
-        File.stub( :directory? ).with( SOURCE_PATH ) { false }
-        File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 3, 'Wed' ) }
-        subject.categorize( SOURCE_FILE ).should eq( :remove )
+      describe "created yesterday" do
+        
+        let( :yestercat ) do
+          File.stub( :directory? ).with( SOURCE_PATH ) { false }
+          File.stub( :mtime ).with( SOURCE_PATH ) { Time.now - DAY }
+          subject.categorize( SOURCE_FILE )
+        end
+
+        it "should be categorized as '... Last Two Weeks'" do
+          yestercat.description.should include( 'Last Two Weeks' )
+        end
+
+        it "should invoke action :retain" do
+          yestercat.action.should eq( :retain )
+        end
       end
 
-      it "should be described as 'Older than Two Weeks' and 'Not Friday'" do
-        description = subject.describe :remove
-        description.should include 'Not Friday'
-        description.should include 'Older than 2 Weeks'
+      describe "created three weeks ago, wednesday" do
+
+        let( :weeksago ) do
+          File.stub( :directory? ).with( SOURCE_PATH ) { false }
+          File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 3, 'Wed' ) }
+          subject.categorize( SOURCE_FILE )
+        end
+
+        it "should be described as 'Older than Two Weeks' and 'Non-Friday'" do
+          weeksago.description.should include 'Non-Friday'
+          weeksago.description.should include 'Older than Two Weeks'
+        end
+
+        it "should invoke action :remove" do
+          weeksago.action.should eq( :remove )
+        end
+
       end
 
-      it "should invoke action :remove" do
-        subject.action( :remove ).should eq( :remove )
+      describe "created three weeks ago, friday" do
+
+        let( :weeksagofriday ) do
+          File.stub( :directory? ).with( SOURCE_PATH ) { false }
+          File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 3, 'Fri' ) }
+          subject.categorize( SOURCE_FILE )
+        end
+
+        it "should be described as 'Friday files', 'Older than Two Weeks'" do
+          weeksagofriday.description.should include( "'Friday' files" )
+          weeksagofriday.description.should include( 'Older than Two Weeks' )
+        end
+
+        it "should invoke action :remove" do
+          weeksagofriday.action.should eq( :retain )
+        end
+
       end
 
-    end
+      describe "created three months ago, friday" do
 
-    describe "created three weeks ago, friday" do
+        let( :oldfriday ) do
+          File.stub( :directory? ).with( SOURCE_PATH ) { false }
+          File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 12, 'Fri' ) }
+          subject.categorize( SOURCE_FILE )
+        end
 
-      it "should be categorized as :sparse" do
-        File.stub( :directory? ).with( SOURCE_PATH ) { false }
-        File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 3, 'Fri' ) }
-        subject.categorize( SOURCE_FILE ).should eq( :sparse )
+        it "should be described as 'Older than Two Months'" do
+          oldfriday.description.should include( 'Older than Two Months' )
+        end
+
+        it "should invoke action :archive" do
+          oldfriday.action.should eq( :archive )
+        end
+
       end
 
-      it "should be described as 'Friday Older than 2 Weeks'" do
-        subject.describe( :sparse ).should eq( 'Friday Older than 2 Weeks' )
+      describe "created three months ago, wednesday" do
+
+        let( :oldwednesday ) do
+          File.stub( :directory? ).with( SOURCE_PATH ) { false }
+          File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 12, 'Wed' ) }
+          subject.categorize( SOURCE_FILE )
+        end
+
+        it "should be described as 'Non-Friday files', 'Older than Two Weeks'" do
+          oldwednesday.description.should include( "'Non-Friday' files" )
+          oldwednesday.description.should include( "Older than Two Weeks" )
+        end
+
+        it "should invoke action :remove" do
+          oldwednesday.action.should eq( :remove )
+        end
+
       end
-
-      it "should invoke action :remove" do
-        subject.action( :sparse ).should eq( :retain )
-      end
-
-    end
-
-    describe "created three months ago, friday" do
-
-      it "should be categorized as :old" do
-        File.stub( :directory? ).with( SOURCE_PATH ) { false }
-        File.stub( :mtime ).with( SOURCE_PATH ) { weeks_ago( 12, 'Fri' ) }
-        subject.categorize( SOURCE_FILE ).should eq( :old )
-      end
-
-      it "should be described as 'Friday Older than 2 Months'" do
-        subject.describe( :old ).should eq( 'Friday Older than 2 Months' )
-      end
-
-      it "should invoke action :remove" do
-        subject.action( :old ).should eq( :archive )
-      end
-
     end
   end
 
