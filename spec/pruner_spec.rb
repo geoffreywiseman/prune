@@ -12,6 +12,7 @@ describe Prune::Pruner do
 
   before( :each ) do
     @retention_policy = double( "RetentionPolicy" )
+    @retention_policy.stub( :categories ) { [] }
     Prune::RetentionPolicy.stub( :new ) { @retention_policy }
   end
 

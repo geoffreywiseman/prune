@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 require 'rubygems'
 require 'date'
+require 'pathname'
 
 module Prune
 
@@ -13,7 +14,7 @@ module Prune
       @today = Date.today
       @categories = Array.new
       @default_category = Category.new "Unmatched Files", :retain, true
-      instance_eval *get_retention_dsl
+      instance_eval *get_retention_dsl( folder_name )
       raise "No categories defined." if @categories.empty?
     end
     
@@ -22,8 +23,19 @@ module Prune
       @categories.find { |cat| cat.includes? file_context } || @default_category
     end
     
-    def get_retention_dsl
-      return File.read( File.join( File.dirname( __FILE__ ), 'default_retention.rb' ) ), 'default_retention.rb'
+    def get_retention_dsl( folder_name )
+      get_dsl( folder_name, '.prune' ) || get_dsl( File.dirname(__FILE__), 'default_retention.rb', 'core retention policy' )
+    end
+    
+    def get_dsl( dsl_folder, dsl_file, human_name=nil )
+      dsl = File.join( dsl_folder, dsl_file )
+      human_name = Pathname.new( dsl ).cleanpath.to_s if human_name.nil?
+      if File.exists?( dsl ) then
+        puts "Loading retention policy from: #{human_name}"
+        return File.read( dsl ), dsl_file
+      else
+        return nil
+      end
     end
     
     def category( description, &block )
@@ -79,7 +91,6 @@ module Prune
     end
     
   end
-  
   
   class FileContext
     attr_accessor :name
