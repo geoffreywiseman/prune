@@ -15,7 +15,6 @@ module Prune
       @categories = Array.new
       @default_category = Category.new "Unmatched Files", :retain, true
       instance_eval *get_retention_dsl( folder_name )
-      raise "No categories defined." if @categories.empty?
     end
     
     def categorize( file_name )

@@ -1,7 +1,4 @@
-require 'prune/pruner'
-require 'prune/retention'
-require 'prune/grouper'
-require 'prune/archiver'
+require 'prune'
 require 'spec_helper'
 require 'rspec'
 
@@ -12,7 +9,7 @@ describe Prune::Pruner do
 
   before( :each ) do
     @retention_policy = double( "RetentionPolicy" )
-    @retention_policy.stub( :categories ) { [] }
+    @retention_policy.stub( :categories ) { [ Category.new( "Unmatched Files", :retain, true ) ] }
     Prune::RetentionPolicy.stub( :new ) { @retention_policy }
   end
 
