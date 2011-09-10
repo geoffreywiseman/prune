@@ -68,3 +68,7 @@ You can employ Prune in an automated fashion, pruning one or more directories on
 prune ~/backups/mysql
 prune --no-archive ~/backups/subversion
 {% endhighlight %}
+
+## Embedding Prune ##
+
+Someone might want to embed prune within a Ruby script or Ruby application. This is probably already possible using Prune, but I haven't put a lot of effort into making sure this can be done easily/effectively, that the API is well-documented, etc. If you want to embed Prune into your application, let me know and I'll do my best to help, even if that means making some changes.
