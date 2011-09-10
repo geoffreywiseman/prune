@@ -1,10 +1,6 @@
 #!/usr/bin/ruby
 require 'rubygems'
-require 'optparse'
 require 'date'
-require 'zlib'
-require 'archive/tar/minitar'
-include Archive::Tar
 
 module Prune
 

@@ -2,9 +2,6 @@
 require 'rubygems'
 require 'optparse'
 require 'date'
-require 'zlib'
-require 'archive/tar/minitar'
-include Archive::Tar
 
 module Prune
   VERSION = [1,0,0]
