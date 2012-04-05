@@ -3,6 +3,7 @@ require 'rubygems'
 require 'date'
 require 'zlib'
 require 'archive/tar/minitar'
+require 'tmpdir'
 include Archive::Tar
 
 module Prune
