@@ -8,17 +8,21 @@ Prune is written as a Ruby library with an optional command-line interface and a
 
 ## Usage
 
-Although prune has a command-line interface, at the moment the retention policy which determines what to
-do with each of the files (retain, remove, archive) and how to take action (archiving files by month in
-a .tar.gz) is basically hard-coded for our current needs, although it's easy to change.
+Prune has a command-line interface and a configurable retention policy. It is packaged as a gem, which
+can be installed easily:
 
-To invoke prune:
+	gem install geoffreywiseman-prune
 
-	bin/prune <folder>
+At which point you should be able to prune a directory using the default retention policy:
 
-To get help on the various command-line options:
+	prune <directory>
 
-	bin/prune --help
+And get more information on using it:
 
-In the long run, I expect this will be packaged as a gem and have the retention policy externalized
-where it can be configured for your own needs.
+	prune --help
+
+The retention policy is [configurable](http://geoffreywiseman.github.com/prune/configure.html).
+
+## Continuous Integration
+
+Prune is built by [Travis CI](http://travis-ci.org/#!/geoffreywiseman/prune).
