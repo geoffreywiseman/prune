@@ -38,7 +38,7 @@ module Prune
           Pruner.new( options ).prune( ARGV.first )
         end
       rescue OptionParser::ParseError
-        $stderr.print "Error: " + $! + "\n"
+        $stderr.print "Error: " + $!.message + "\n"
       end
 
     end

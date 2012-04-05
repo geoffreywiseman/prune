@@ -1,7 +1,7 @@
 require 'prune/retention'
 require 'prune/category'
 require 'rspec'
-require 'spec/spec_helper'
+require 'spec_helper'
 
 DAY = 24 * 60 * 60
 
