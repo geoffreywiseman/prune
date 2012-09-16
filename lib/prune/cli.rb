@@ -10,9 +10,8 @@ module Prune
 
     DEFAULT_OPTIONS = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true }
 
-    def self.parse_and_run
-      options = DEFAULT_OPTIONS.dup
-      parser = OptionParser.new do |opts|
+    def self.make_parser( options )
+      OptionParser.new do |opts|
         opts.banner = "Usage: prune [options] folder"
         opts.on( "-v", "--verbose", "Prints much more frequently during execution about what it's doing." ) { options[:verbose] = true }
         opts.on( "-d", "--dry-run", "Categorizes files, but does not take any actions on them." ) { options[:dry_run] = true }
@@ -28,7 +27,11 @@ module Prune
           puts opts
         end
       end
+    end
 
+    def self.parse_and_run
+      options = DEFAULT_OPTIONS.dup
+      parser = make_parser options
       begin
         parser.parse!
 
