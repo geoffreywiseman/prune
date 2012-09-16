@@ -31,16 +31,19 @@ module Prune
       end
     end
     
+    def get_filenames( root )
+      Dir.entries( root ).map { |tmpfile| File.join( root, tmpfile ) }.reject { |path| File.directory? path }
+    end
+    
     def update_archive( archive_path, paths )
       puts "Archive file #{archive_path} exists." if @verbose
       Dir.mktmpdir do |tmp_dir|
         puts "Created temporary directory #{tmp_dir} to extract contents of existing archive file." if @verbose
         tgz = Zlib::GzipReader.new( File.open( archive_path, 'rb' ) )
         Minitar.unpack( tgz, tmp_dir )
-        extracted_paths = Dir.entries( tmp_dir ).map { |tmpfile| File.join( tmp_dir, tmpfile ) }.reject { |path| File.directory? path }
-        combined_paths = extracted_paths + paths
+        extracted_paths = get_filenames( tmp_dir )
         tgz = Zlib::GzipWriter.new( File.open( archive_path, 'wb' ) )
-        Minitar.pack( combined_paths, tgz )
+        Minitar.pack( extracted_paths + paths, tgz )
         puts "Added #{paths.size} file(s) to #{archive_path} archive already containing #{extracted_paths.size} file(s)." if @verbose
       end
     end
