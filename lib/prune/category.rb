@@ -27,4 +27,8 @@ class Category
     @quiet
   end
   
+  def to_s
+    "#{description} (#{action})"
+  end
+  
 end

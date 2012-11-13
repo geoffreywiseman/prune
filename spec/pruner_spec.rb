@@ -75,19 +75,53 @@ describe Prune::Pruner do
     end
 
     context "with file categorized as :remove" do
-      it "should delete file" do
-        filename = 'delete-me.txt'
-        stub_files filename
+      FILENAME = 'delete-me.txt'
+      
+      before( :each ) do
+        stub_messages
+        
+        stub_files FILENAME
         
         category = double( category )
         category.stub( :description ) { "Old" }
         category.stub( :action ) { :remove }
         category.stub( :quiet? ) { false }
-        
-        @retention_policy.should_receive( :categorize ).with( filename ) { category }
-        File.should_receive( :delete ).with( File.join( PRUNE_PATH, filename ) )
+        @retention_policy.should_receive( :categorize ).with( FILENAME ) { category }
+      end
+      
+      it "should delete file" do
+        File.should_receive( :delete ).with( File.join( PRUNE_PATH, FILENAME ) )
         subject.prune PRUNE_PATH
       end
+      
+      it "should display file deleted message" do
+        File.stub( :delete )
+        subject.prune PRUNE_PATH
+        @messages.should include_match( /file\(s\) deleted/ )
+      end
+    end
+      
+    context "with no files categorized as archive" do
+        
+      before do
+        subject.options[:archive] = true
+        stub_files
+        stub_messages
+        
+        category = double( "category" )
+        category.stub( :action ) { :archive }
+        category.stub( :description ) { "Archive" }
+        category.stub( :quiet? ) { false }
+        
+        @retention_policy.stub( :categories ) { [ category ]}
+      end
+        
+      it "should indicate no archive necessary" do
+        subject.prune PRUNE_PATH
+        puts "Messages: #{@messages}"
+        @messages.should include_match( /No files categorized for archival/ )
+      end
+        
     end
 
     context "with files categorized as :archive" do
@@ -96,21 +130,28 @@ describe Prune::Pruner do
       before do
         subject.options[:archive] = true
         stub_files files
-      end
+        stub_messages
 
-      it "should archive files in groups" do
         category = double( "category" )
         @retention_policy.stub( :categorize ) { category }
         category.stub( :action ) { :archive }
         category.stub( :description ) { "Ancient" }
         category.stub( :quiet? ) { false }
-        
+      end
+
+      it "should archive files in groups" do
         grouper = double( "Grouper" )
         Prune::Grouper.stub( :new ) { grouper }
         grouper.should_receive( :group ).with( PRUNE_PATH, files )
         grouper.should_receive( :archive ) { "2 Archives created." }
 
         subject.prune PRUNE_PATH
+      end
+      
+      it "should display message if archive option disabled" do
+        subject.options[:archive] = false
+        subject.prune PRUNE_PATH
+        @messages.should include_match( /Archive option disabled/ )
       end
     end
 

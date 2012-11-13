@@ -69,7 +69,7 @@ module Prune
         result = take_action( action, folder_name, files )
         if !result.nil? then
           puts result
-          actions += 1
+          actions += files.size
         end
       end
       print "No actions necessary.\n" if actions == 0
@@ -78,6 +78,16 @@ module Prune
     def take_action( action, folder_name, files )
       case action
       when :remove
+        take_remove_action folder_name, files
+      when :archive
+        take_archive_action folder_name, files
+      end
+    end
+    
+    def take_remove_action( folder_name, files )
+      if files.empty? then
+        "No files categorized to be removed."
+      else
         paths = files.map { |file| File.join folder_name, file }
         begin
           File.delete *paths
@@ -85,15 +95,21 @@ module Prune
         rescue
           raise IOError, "Could not remove file(s): #{$!}"
         end
-      when :archive
-        if @options[:archive] then
+      end
+    end
+    
+    def take_archive_action( folder_name, files )
+      if @options[:archive] then
+        if files.empty? then
+          "No files categorized for archival, so no archives created."
+        else
           archiver = Archiver.new( @options[:archive_path], folder_name, @options[:verbose] )
           grouper = Grouper.new( archiver )
           grouper.group( folder_name, files );
           grouper.archive
-        else
-          "Archive option disabled. Archive(s) not created."
         end
+      else
+        "Archive option disabled. Archive(s) not created."
       end
     end
 
@@ -111,6 +127,7 @@ module Prune
       @categories[ category ] << file unless category.nil?
       @analyzed_count += 1
     end
+    
   end
 
 end
