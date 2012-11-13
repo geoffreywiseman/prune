@@ -149,7 +149,6 @@ describe Prune::RetentionPolicy do
         else
           file.fyear = nil
         end
-        print "#{file.name} file year is #{file.fyear}"
       end
       subject.category "Ignoring" do 
         match { |f| File.directory?(f.name) || f.fyear.nil? }
