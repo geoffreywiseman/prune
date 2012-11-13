@@ -11,10 +11,10 @@ describe Prune::RetentionPolicy do
   SOURCE_FILE = "source_file"
   SOURCE_PATH = "#{SOURCE_DIR}/#{SOURCE_FILE}"
 
-  subject { Prune::RetentionPolicy.new SOURCE_DIR }
-
   describe "default retention policy" do
     
+    subject { Prune::RetentionPolicy.new SOURCE_DIR }
+
     it "should return categories in dsl order" do
       cats = subject.categories
       cats.shift.description.should include( "Ignoring directories" )
@@ -134,6 +134,66 @@ describe Prune::RetentionPolicy do
           oldwednesday.action.should eq( :remove )
         end
 
+      end
+    end
+  end
+  
+  describe "filename-based retention policy" do
+    
+    subject { Prune::RetentionPolicy.new SOURCE_DIR, load_dsl: false }
+    
+    before do
+      subject.preprocess do |file|
+        if file.name =~ /-(\d{8})./ then
+          file.fyear = Date.parse($1).year
+        else
+          file.fyear = nil
+        end
+        print "#{file.name} file year is #{file.fyear}"
+      end
+      subject.category "Ignoring" do 
+        match { |f| File.directory?(f.name) || f.fyear.nil? }
+        ignore
+        quiet
+      end
+      subject.category "2010" do
+        match { |f| File.file?(f.name) && f.fyear == 2010  }
+        retain
+      end
+      subject.category "2011" do
+        match { |f| File.file?(f.name) && f.fyear == 2011  }
+        retain
+      end
+    end
+    
+    it "should ignore directories" do
+      subject.categorize( "." ).description.should eq( "Ignoring" )
+    end
+    
+    it "should ignore files not matching pattern" do
+      File.stub(:file?) { true }
+      subject.categorize( 'readme.txt' ).description.should eq( 'Ignoring' )
+    end
+    
+    describe "with a file named with 20101001" do
+      before do
+        File.stub(:directory?) { false }
+        File.stub(:file?) { true }
+      end
+      
+      it "should categorize as 2010" do
+        subject.categorize( 'mysql-prod-20101001.sql.gz' ).description.should eq( '2010' )
+      end
+    end
+
+    describe "with a file named with 20110215" do
+      before do
+        File.stub(:directory?) { false }
+        File.stub(:file?) { true }
+      end
+      
+      it "should categorize as 2011" do
+        subject.categorize( 'subversion-20110215.tar.gz' ).description.should eq( '2011' )
       end
     end
   end

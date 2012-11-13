@@ -28,7 +28,7 @@ class Category
   end
   
   def to_s
-    "#{description} (#{action})"
+    @description
   end
   
 end

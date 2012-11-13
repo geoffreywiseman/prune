@@ -6,15 +6,21 @@ require 'pathname'
 module Prune
 
   class RetentionPolicy
-    
+    DEFAULT_OPTIONS={ load_dsl: true }
+
     attr_accessor :categories
     
-    def initialize( folder_name )
+    def initialize( folder_name, options = {} )
+      options = DEFAULT_OPTIONS.merge( options )
       @folder_name = folder_name
       @today = Date.today
       @categories = Array.new
       @default_category = Category.new "Unmatched Files", :retain, true
-      instance_eval *get_retention_dsl( folder_name )
+      load_retention_dsl if options[:load_dsl]
+    end
+    
+    def load_retention_dsl()
+      instance_eval *get_retention_dsl( @folder_name )
     end
     
     def categorize( file_name )
