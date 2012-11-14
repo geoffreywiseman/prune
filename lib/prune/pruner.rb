@@ -32,7 +32,7 @@ module Prune
       end
       print "\n" if @options[:verbose]
 
-      display_categories policy
+      display_categories( @categories )
       print "\t#{@analyzed_count} file(s) analyzed\n"
     end
 
@@ -113,13 +113,21 @@ module Prune
       end
     end
 
-    def display_categories( policy )
-      @categories.each_pair do |category,files|
-        if !category.quiet? || @options[:verbose] then 
+    def display_categories( categories )
+      categories.each_pair do |category,files|
+        if should_display?( category, files ) then 
           print "\t#{category.description}:\n\t\t"
-          puts files.join( "\n\t\t")
+          if files.empty? then
+            puts "none"
+          else
+            puts files.join( "\n\t\t" )
+          end
         end
       end
+    end
+    
+    def should_display?( category, files )
+      @options[:verbose] || !( category.quiet? || files.empty? )
     end
 
     def analyze_file( policy, file )

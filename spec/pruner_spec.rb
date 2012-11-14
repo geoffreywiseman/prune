@@ -8,8 +8,9 @@ describe Prune::Pruner do
   subject { Prune::Pruner.new Hash.new }
 
   before( :each ) do
+    @categories = [ Category.new( "Unmatched Files", :retain, true ) ]
     @retention_policy = double( "RetentionPolicy" )
-    @retention_policy.stub( :categories ) { [ Category.new( "Unmatched Files", :retain, true ) ] }
+    @retention_policy.stub( :categories ) { @categories }
     Prune::RetentionPolicy.stub( :new ) { @retention_policy }
   end
 
@@ -154,7 +155,59 @@ describe Prune::Pruner do
         @messages.should include_match( /Archive option disabled/ )
       end
     end
+  
+  end
+  
+  describe "when displaying categories" do
+      
+    before do
+      stub_messages
+    end
+      
+    describe "when verbose" do
+      
+      before do
+        subject.options[:verbose]=true
+      end
+        
+      it "should display empty categories" do
+        subject.display_categories( { Category.new( "Empty Category", :retain ) => [] } )
+        @messages.should include_match( /Empty Category/ )
+      end
+        
+      it "should display quiet categories" do
+        subject.display_categories( { Category.new( "Quiet Category", :retain, true ) => [ 'quiet.txt' ] } )
+        @messages.should include_match( /Quiet Category/ )
+      end
+      
+      it "should display categories with files" do
+        subject.display_categories( { Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
+        @messages.should include_match( /Normal Category/ )
+      end
+    end
+    
+    describe "when not verbose" do
+      
+      before do
+        subject.options[:verbose]=false
+      end
+        
+      it "should not display empty categories" do
+        subject.display_categories( { Category.new( "Empty Category", :retain, true ) => [] } )
+        @messages.should_not include_match( /Empty Category/ )
+      end
+      
+      it "should not display quiet categories" do
+        subject.display_categories( { Category.new( "Quiet Category", :retain, true ) => [ 'shhh.txt' ] } )
+        @messages.should_not include_match( /Quiet Category/ )
+      end
+      
+      it "should display categories with files" do
+        subject.display_categories( { Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
+        @messages.should include_match( /Normal Category/ )
+      end
 
+    end
   end
 
   describe "Confirmation Prompt" do
