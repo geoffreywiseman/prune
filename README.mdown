@@ -1,4 +1,5 @@
-# Prune:  Deleting and archiving files by date
+# Prune:  Deleting and archiving files by date 
+[![Build Status](https://travis-ci.org/geoffreywiseman/prune.png)](https://travis-ci.org/geoffreywiseman/prune)
 
 We have some nightly processes that archive information that we'd like to retain, either for reference or
 for possible restoration.  In order to keep space usage somewhat reasonable, we'd like to prune some of
