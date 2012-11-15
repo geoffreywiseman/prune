@@ -1,5 +1,6 @@
 require 'prune/cli'
 require 'prune/pruner'
+require 'prune/configurer'
 require 'spec_helper'
 require 'rspec'
 
@@ -82,6 +83,16 @@ describe Prune::CommandLineInterface do
     describe "and a --no-prompt argument" do
       it "should set the prompt option to false" do
         assert_arg_to_option "--no-prompt", :prompt => false
+      end
+    end
+    
+    describe "and a --config argument" do
+      it "should set the configure option to true" do
+        configurer = double( "Configurer" )
+        Prune::Configurer.should_receive( :new ).with( PATH, hash_including( :configure => true ) ).and_return( configurer )
+        configurer.should_receive( :configure )
+        ARGV.push( "--config" )
+        Prune::CommandLineInterface::parse_and_run
       end
     end
 

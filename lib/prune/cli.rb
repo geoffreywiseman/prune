@@ -8,7 +8,7 @@ module Prune
 
   class CommandLineInterface
 
-    DEFAULT_OPTIONS = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true }
+    DEFAULT_OPTIONS = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true, :configure => false }
 
     def self.make_parser( options )
       OptionParser.new do |opts|
@@ -18,6 +18,7 @@ module Prune
         opts.on( "-f", "--force", "--no-prompt", "Will take action without asking permissions; useful for automation." ) { options[:prompt] = false }
         opts.on( "-a", "--archive-folder FOLDER", "The folder in which archives should be stored; defaults to <folder>/../<folder-name>-archives." ) { |path| options[:archive_path] = path }
         opts.on( "--no-archive", "Don't perform archival; typically if the files you're pruning are already compressed." ) { options[:archive] = false }
+        opts.on( "--config", "Configure the retention policy for the specified folder." ) { options[:configure] = true }
         opts.on_tail( "--version", "Displays version information." ) do
           options[:did_work] = true
           print "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
@@ -35,10 +36,15 @@ module Prune
       begin
         parser.parse!
 
-        if ARGV.size != 1 then
-          print parser.help unless options[:did_work]
+        if ARGV.size == 1 then
+          if options[:configure] then
+            configurer = Configurer.new( ARGV.first, options )
+            configurer.configure
+          else
+            Pruner.new( options ).prune( ARGV.first )
+          end
         else
-          Pruner.new( options ).prune( ARGV.first )
+          print parser.help unless options[:did_work]
         end
       rescue OptionParser::ParseError
         $stderr.print "Error: " + $!.message + "\n"
