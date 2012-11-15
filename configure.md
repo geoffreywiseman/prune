@@ -11,7 +11,11 @@ Although I can imagine lots of ways to further allow customization of Prune, thi
 
 The retention policy is where you specify the rules that determine how you analyze and categories the files to be retained, removed, archived or ignored. This is the area I imagine most people would want to make changes to the defaults that I've established for Prune. The default retention policy for prune can be found in <code>lib/prune/default_retention.rb</code>, but you don't need to change that.
 
-If you're going to invoke prune regularly on a particular folder, and you'd like to customize the retention policy, simply create a <code>.prune</code> file in the target folder and implement a retention policy using Prune's simple DSL. Here's the default retention policy by way of example:
+If you're going to invoke prune regularly on a particular folder, and you'd like to customize the retention policy, simply create a <code>.prune</code> file in the target folder and implement a retention policy using Prune's simple DSL. 
+
+The simplest way to do that is to invoke `prune --config <folder>`. Prune will check to see if there's a `.prune` configuration file. If there is, it will open it for editing. If there isn't, it will copy the core retention policy to the specified folder, then open it for editing,
+
+Here's the default retention policy by way of example:
 
 {% highlight ruby %}
 preprocess do |file|
