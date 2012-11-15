@@ -189,7 +189,7 @@ describe Prune::CommandLineInterface do
       it "should print version number" do
           $stderr.stub( :print ) { |message| @messages << message  }
           Prune::CommandLineInterface::parse_and_run
-          @messages.should include_match( /Prune 1.0.0/ )
+          @messages.should include_match( /Prune #{Prune::VERSION}/ )
       end
 
       it "should not invoke prune" do

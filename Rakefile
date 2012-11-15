@@ -4,6 +4,7 @@ require 'rspec/core/rake_task'
 require 'rspec'
 require 'rubygems'
 require 'rubygems/package_task'
+require 'prune'
 
 CLEAN.include( 'coverage', 'pkg' )
 
@@ -21,7 +22,7 @@ end
 
 spec = Gem::Specification.new do |spec|
   spec.name = 'geoffreywiseman-prune'
-  spec.version = '1.1.1'
+  spec.version = Prune::VERSION
   spec.date = '2011-09-09'
   spec.summary = 'Prunes files from a folder based on a retention policy, often time-based.'
   spec.description = 'Prune is meant to analyze a folder full of files, run them against a retention policy and decide which to keep, which to remove and which to archive. It is extensible and embeddable.'

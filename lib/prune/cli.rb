@@ -4,7 +4,7 @@ require 'optparse'
 require 'date'
 
 module Prune
-  VERSION = [1,0,0]
+  VERSION = Gem::Version.new '1.2.0.rc3'
 
   class CommandLineInterface
 
@@ -21,7 +21,7 @@ module Prune
         opts.on( "--config", "Configure the retention policy for the specified folder." ) { options[:configure] = true }
         opts.on_tail( "--version", "Displays version information." ) do
           options[:did_work] = true
-          print "Prune #{VERSION.join('.')}, by Geoffrey Wiseman."
+          print "Prune #{VERSION}, by Geoffrey Wiseman.\n"
         end
         opts.on_tail( "-?", "--help", "Shows quick help about using prune." ) do
           options[:did_work] = true

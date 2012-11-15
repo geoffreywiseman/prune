@@ -6,7 +6,7 @@ require 'pathname'
 module Prune
 
   class RetentionPolicy
-    DEFAULT_OPTIONS={ load_dsl: true }
+    DEFAULT_OPTIONS={ :load_dsl => true }
 
     attr_accessor :categories
     
