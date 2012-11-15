@@ -292,9 +292,4 @@ describe Prune::Pruner do
     end
   end
 
-  def stub_messages
-    @messages = []
-    $stdout.stub( :write ) { |message| @messages << message  }
-  end
-
 end

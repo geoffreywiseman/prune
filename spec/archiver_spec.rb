@@ -4,6 +4,10 @@ require 'rspec'
 
 describe Prune::Archiver do
   SOURCE='/mysql'
+  
+  before do
+    surpress_messages
+  end
 
   describe "with a #{SOURCE} source" do
     DESTINATION = '/mysql-archives'

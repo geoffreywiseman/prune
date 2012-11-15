@@ -11,6 +11,10 @@ describe Prune::RetentionPolicy do
   SOURCE_FILE = "source_file"
   SOURCE_PATH = "#{SOURCE_DIR}/#{SOURCE_FILE}"
 
+  before do
+    surpress_messages
+  end
+
   describe "default retention policy" do
     
     subject { Prune::RetentionPolicy.new SOURCE_DIR }

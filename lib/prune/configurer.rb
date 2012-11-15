@@ -12,10 +12,10 @@ module Prune
         if File.writable? @config_file then
           edit_config
         else
-          puts "Configuration file #{@config_file} exists, but is not writeable."
+          puts "Configuration file #{@config_file} exists, but is not writeable; cannot edit configuration."
         end
       elsif File.directory? @config_file
-        puts "Configuration file #{@config_file} exists, but is a directory."
+        puts "Configuration file #{@config_file} exists, but is a directory; cannot create or edit configuration file."
       else
         create_config
         edit_config
@@ -45,7 +45,7 @@ module Prune
         if system( "#{editor} #{@config_file}" ) then
           puts "Configuration complete."
         else
-          puts "Failed to edit file: #{result}"
+          puts "Failed to edit file."
         end
       end
     end
