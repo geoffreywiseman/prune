@@ -5,9 +5,11 @@ require 'date'
 module Prune
 
   class Pruner
+    FILTERS = [ '.', '..', '.prune' ]
+
     attr_reader :categories
     attr_reader :options
-
+    
     def initialize( options )
       @options = options
       @categories = Hash.new { |h,k| h[k] = [] } # initialize new keys with an empty array
@@ -28,7 +30,7 @@ module Prune
       print "Analyzing '#{folder_name}':\n"
       files = Dir.entries( folder_name ).sort_by { |f| test(?M, File.join( folder_name, f ) ) }
       files.each do |file|
-        analyze_file( policy, file )
+        analyze_file( policy, file ) unless filter?(file)
       end
       print "\n" if @options[:verbose]
 
@@ -134,6 +136,14 @@ module Prune
       category = policy.categorize( file )
       @categories[ category ] << file unless category.nil?
       @analyzed_count += 1
+    end
+    
+    def filter?( file )
+      return file =~ /\.prune/
+    end
+
+    def filter?( file )
+      return FILTERS.include? file
     end
     
   end

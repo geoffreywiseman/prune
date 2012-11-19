@@ -52,6 +52,33 @@ describe Prune::Pruner do
 
     end
 
+    context "with just a .prune file" do
+
+      before( :each ) do
+        stub_files [ ".prune", '.', '..' ]
+        stub_messages
+        subject.prune PRUNE_PATH
+      end
+
+      it "should not invoke the retention policy" do
+        @retention_policy.should_not_receive( :categorize )
+      end
+
+      it "should print 'Analyzing #{PRUNE_PATH}'" do
+        @messages.should include("Analyzing '#{PRUNE_PATH}':\n")
+      end
+
+      it "should say no action was required" do
+        @messages.should include("No actions necessary.\n")
+      end
+
+      it "should say no files were analyzed" do
+        @messages.should include_match( /0 file\(s\) analyzed/ )
+      end
+
+    end
+
+
     context "with three files" do
       ONE_DAY = 86400
 
