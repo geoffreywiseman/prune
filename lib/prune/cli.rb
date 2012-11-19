@@ -4,7 +4,7 @@ require 'optparse'
 require 'date'
 
 module Prune
-  VERSION = Gem::Version.new '1.2.0.rc3'
+  VERSION = Gem::Version.new '1.2.0.rc4'
 
   class CommandLineInterface
 
