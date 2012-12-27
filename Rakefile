@@ -23,7 +23,7 @@ end
 spec = Gem::Specification.new do |spec|
   spec.name = 'geoffreywiseman-prune'
   spec.version = Prune::VERSION
-  spec.date = '2011-09-09'
+  spec.date = Prune::RELEASE_DATE
   spec.summary = 'Prunes files from a folder based on a retention policy, often time-based.'
   spec.description = 'Prune is meant to analyze a folder full of files, run them against a retention policy and decide which to keep, which to remove and which to archive. It is extensible and embeddable.'
   spec.author = 'Geoffrey Wiseman'
