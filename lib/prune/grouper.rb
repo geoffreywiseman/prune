@@ -1,4 +1,7 @@
 module Prune
+
+  # Assembles files into groups by month name, for archival. This is not
+  # currently a configurable behaviour (grouping by some other means, for instance.)
   class Grouper
 
     def initialize( archiver )

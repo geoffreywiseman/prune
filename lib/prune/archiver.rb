@@ -7,6 +7,10 @@ require 'tmpdir'
 include Archive::Tar
 
 module Prune
+
+  # Responsible for making or updating archives based on a list of files. 
+  #
+  # This is essentially a wrapper around tar/zlib.
   class Archiver
     attr_reader :destination
 

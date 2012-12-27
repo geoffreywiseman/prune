@@ -4,6 +4,8 @@ require 'date'
 
 module Prune
 
+  # The co-ordinating class of Prune, Pruner works with the retention policy, archiver, grouper to get everything done.
+  # This is the central hub through which almost all other activity passes.
   class Pruner
     FILTERS = [ '.', '..', '.prune' ]
 

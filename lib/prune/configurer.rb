@@ -1,6 +1,11 @@
 require 'fileutils'
 
 module Prune
+
+  # The configurer is used for configure a custom retention policy for a specified folder by either 
+  # editing the retention policy already in place,
+  # or by copying the default retention policy from the gem into place in the specified directory, 
+  # and then editing it.
   class Configurer
 
     def initialize( folder, options = {} )

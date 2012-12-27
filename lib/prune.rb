@@ -7,4 +7,4 @@ require 'prune/retention'
 require 'prune/grouper'
 require 'prune/category'
 require 'prune/configurer'
-
+require 'prune/meta'

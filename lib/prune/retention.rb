@@ -5,6 +5,9 @@ require 'pathname'
 
 module Prune
 
+  # Represents a retention policy, whether loaded from the core retention policy or from a project-specific configured retention
+  # policy. It defines all the categories, the actions associated with them and some other elements. It is the primary form of
+  # prune Configuration.
   class RetentionPolicy
     DEFAULT_OPTIONS={ :load_dsl => true }
 
@@ -54,7 +57,8 @@ module Prune
     end
     
   end
-  
+
+  # A builder for building categories -- this is essentially the DSL used in the retention policy.
   class CategoryBuilder
     
     def initialize( description )
@@ -97,6 +101,8 @@ module Prune
     
   end
   
+  # A thin wrapper around files for holding attributes that might be precalculated and then
+  # used by a number of categories.
   class FileContext
     attr_accessor :name
     

@@ -1,2 +1,4 @@
 prune.tmproj
 .DS_Store
+.yardoc
+doc

@@ -8,7 +8,7 @@ describe Prune::Pruner do
   subject { Prune::Pruner.new Hash.new }
 
   before( :each ) do
-    @categories = [ Category.new( "Unmatched Files", :retain, true ) ]
+    @categories = [ Prune::Category.new( "Unmatched Files", :retain, true ) ]
     @retention_policy = double( "RetentionPolicy" )
     @retention_policy.stub( :categories ) { @categories }
     Prune::RetentionPolicy.stub( :new ) { @retention_policy }
@@ -198,17 +198,17 @@ describe Prune::Pruner do
       end
         
       it "should display empty categories" do
-        subject.display_categories( { Category.new( "Empty Category", :retain ) => [] } )
+        subject.display_categories( { Prune::Category.new( "Empty Category", :retain ) => [] } )
         @messages.should include_match( /Empty Category/ )
       end
         
       it "should display quiet categories" do
-        subject.display_categories( { Category.new( "Quiet Category", :retain, true ) => [ 'quiet.txt' ] } )
+        subject.display_categories( { Prune::Category.new( "Quiet Category", :retain, true ) => [ 'quiet.txt' ] } )
         @messages.should include_match( /Quiet Category/ )
       end
       
       it "should display categories with files" do
-        subject.display_categories( { Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
+        subject.display_categories( { Prune::Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
         @messages.should include_match( /Normal Category/ )
       end
     end
@@ -220,17 +220,17 @@ describe Prune::Pruner do
       end
         
       it "should not display empty categories" do
-        subject.display_categories( { Category.new( "Empty Category", :retain, true ) => [] } )
+        subject.display_categories( { Prune::Category.new( "Empty Category", :retain, true ) => [] } )
         @messages.should_not include_match( /Empty Category/ )
       end
       
       it "should not display quiet categories" do
-        subject.display_categories( { Category.new( "Quiet Category", :retain, true ) => [ 'shhh.txt' ] } )
+        subject.display_categories( { Prune::Category.new( "Quiet Category", :retain, true ) => [ 'shhh.txt' ] } )
         @messages.should_not include_match( /Quiet Category/ )
       end
       
       it "should display categories with files" do
-        subject.display_categories( { Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
+        subject.display_categories( { Prune::Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
         @messages.should include_match( /Normal Category/ )
       end
 

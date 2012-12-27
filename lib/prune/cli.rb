@@ -4,8 +4,10 @@ require 'optparse'
 require 'date'
 
 module Prune
-  VERSION = Gem::Version.new '1.2.0.rc4'
 
+  # The command-line interface for prune is the primary way to interact with it, although it can be invoked programatically as well.
+  #
+  # This class defines the arguments and options taken by Prune and how it reacts to various forms of command-line input.
   class CommandLineInterface
 
     DEFAULT_OPTIONS = { :verbose => false, :did_work => false, :dry_run => false, :prompt => true, :archive => true, :configure => false }
