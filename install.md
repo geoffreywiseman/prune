@@ -7,14 +7,14 @@ Prune is packed as a [ruby gem](https://rubygems.org/gems/geoffreywiseman-prune)
 {% highlight bash %}
 $ gem install geoffreywiseman-prune
 Fetching: minitar-0.5.3.gem (100%)
-Fetching: geoffreywiseman-prune-1.1.1.gem (100%)
+Fetching: geoffreywiseman-prune-1.2.0.gem (100%)
 Successfully installed minitar-0.5.3
-Successfully installed geoffreywiseman-prune-1.1.1
+Successfully installed geoffreywiseman-prune-1.2.0
 2 gems installed
 Installing ri documentation for minitar-0.5.3...
-Installing ri documentation for geoffreywiseman-prune-1.1.1...
+Installing ri documentation for geoffreywiseman-prune-1.2.0...
 Installing RDoc documentation for minitar-0.5.3...
-Installing RDoc documentation for geoffreywiseman-prune-1.1.1...
+Installing RDoc documentation for geoffreywiseman-prune-1.2.0...
 $ prune --help
 Usage: prune [options] folder
     -v, --verbose                    Prints much more frequently during execution about what it's doing.
@@ -26,4 +26,4 @@ Usage: prune [options] folder
     -?, --help                       Shows quick help about using prune.
 {% endhighlight %}
 
-Prune is also available as a [Zip archive](https://github.com/downloads/geoffreywiseman/prune/prune-1.1.1.zip), a [Tarball](https://github.com/downloads/geoffreywiseman/prune/prune-1.1.1.tar.gz) or [directly through GitHub](http://github.com/geoffreywiseman/prune/), all visible in the banner above.
+Prune is [hosted on GitHub](http://github.com/geoffreywiseman/prune/), or you can download a full [ZIP archive](https://github.com/geoffreywiseman/prune/archive/master.zip) of the repository.
