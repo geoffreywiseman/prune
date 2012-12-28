@@ -1,7 +1,12 @@
-# Prune:  Deleting and archiving files by date 
+# Prune:  Maintaining Steady State in a Folder/Tree
 [![Build Status](https://travis-ci.org/geoffreywiseman/prune.png)](https://travis-ci.org/geoffreywiseman/prune) [![Dependency Status](https://gemnasium.com/geoffreywiseman/prune.png)](https://gemnasium.com/geoffreywiseman/prune) [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/geoffreywiseman/prune)
 
-We have some nightly processes that archive information that we'd like to retain, either for reference or for possible restoration.  In order to keep space usage somewhat reasonable, we'd like to prune some of those files as they get older.  Prune satisfies that need.
+Prune's raison d'etre is to allow you to maintain a folder in a steady state by setting up rules to determine which files should be
+retained, removed, archived, etc.
+
+Prune was created to maintain a set of backups by retaining two weeks, removing files older than two weeks except the 'friday' files,
+and archiving things older than two months, but for the most part,
+the nature of those rules is configurable so that you can make the decisions that make sense for your own project.
 
 Prune is written as a Ruby library with an optional command-line interface and a wrapping shell script.
 
