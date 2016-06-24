@@ -118,12 +118,12 @@ describe Prune::Pruner do
       end
       
       it "should delete file" do
-        File.should_receive( :delete ).with( File.join( PRUNE_PATH, FILENAME ) )
+        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true )
         subject.prune PRUNE_PATH
       end
       
       it "should display file deleted message" do
-        File.stub( :delete )
+        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true )
         subject.prune PRUNE_PATH
         @messages.should include_match( /file\(s\) deleted/ )
       end

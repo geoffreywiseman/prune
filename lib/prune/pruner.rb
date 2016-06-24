@@ -93,8 +93,10 @@ module Prune
         "No files categorized to be removed."
       else
         paths = files.map { |file| File.join folder_name, file }
+
         begin
-          File.delete *paths
+          paths.each { |path| FileUtils.remove_entry( path, true ) }
+         
           "#{files.size} file(s) deleted"
         rescue
           raise IOError, "Could not remove file(s): #{$!}"
