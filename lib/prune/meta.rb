@@ -5,8 +5,8 @@
 # @author Geoffrey Wiseman
 module Prune
   # The version of the prune gem and all the associated code.
-  VERSION = Gem::Version.new '1.2.0'
+  VERSION = Gem::Version.new '1.3.0'
 
   # The release date associated with the version
-  RELEASE_DATE = '2012-12-26'
+  RELEASE_DATE = '2016-06-24'
 end
