@@ -118,15 +118,22 @@ describe Prune::Pruner do
       end
       
       it "should delete file" do
-        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true )
+        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 1 }
         subject.prune PRUNE_PATH
       end
       
       it "should display file deleted message" do
-        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true )
+        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 1 }
         subject.prune PRUNE_PATH
-        @messages.should include_match( /file\(s\) deleted/ )
+        @messages.should include_match( /1 file\(s\) deleted/ )
       end
+
+      it "should display failed deletion mesage" do
+        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 0 }
+        subject.prune PRUNE_PATH
+        @messages.should include_match( /0 file\(s\) deleted, 1 file\(s\) could not be deleted/ )
+      end
+
     end
       
     context "with no files categorized as archive" do

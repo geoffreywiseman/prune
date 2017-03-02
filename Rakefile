@@ -6,19 +6,13 @@ require 'rubygems'
 require 'rubygems/package_task'
 require 'prune'
 
-CLEAN.include( 'coverage', 'pkg' )
+CLEAN.include( 'pkg' )
 
 desc '"spec" (run RSpec)'
 task :default => :spec
 
 desc "Run RSpec on spec/*"
 RSpec::Core::RakeTask.new
-
-desc "Generate code coverage"
-RSpec::Core::RakeTask.new(:coverage) do |t|
-  t.rcov = true
-  t.rcov_opts = ['--exclude', 'spec,/gems/,/rubygems/', '--text-report']
-end
 
 spec = Gem::Specification.new do |spec|
   spec.name = 'geoffreywiseman-prune'

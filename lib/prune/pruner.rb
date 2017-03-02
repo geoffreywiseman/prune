@@ -95,9 +95,18 @@ module Prune
         paths = files.map { |file| File.join folder_name, file }
 
         begin
-          paths.each { |path| FileUtils.remove_entry( path, true ) }
-         
-          "#{files.size} file(s) deleted"
+          failed_paths = []
+          paths.each do |path|
+            if FileUtils.remove_entry( path, true ) == 0
+              failed_paths << path
+            end
+          end
+
+          if failed_paths.empty?
+            "#{files.size} file(s) deleted"
+          else
+            "#{files.size-failed_paths.size} file(s) deleted, #{failed_paths.size} file(s) could not be deleted."
+          end
         rescue
           raise IOError, "Could not remove file(s): #{$!}"
         end

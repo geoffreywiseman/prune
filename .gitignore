@@ -3,3 +3,7 @@ prune.tmproj
 .yardoc
 doc
 pkg
+coverage/
+.bundle
+.idea
+.ruby-version

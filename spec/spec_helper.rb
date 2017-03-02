@@ -1,3 +1,6 @@
+require 'simplecov'
+SimpleCov.start
+
 def stub_messages
   @messages = []
   $stdout.stub( :write ) { |message| @messages << message  }
