@@ -27,10 +27,11 @@ spec = Gem::Specification.new do |spec|
   spec.email = 'geoffrey.wiseman@codiform.com'
   spec.homepage = 'http://geoffreywiseman.github.com/prune'
   spec.executables << 'prune'
+  spec.license = "UNLICENSE"
   
   spec.files = Dir['{lib,spec}/**/*.rb', 'bin/*', 'Rakefile', 'README.mdown', 'UNLICENSE']
   
-  spec.add_dependency( 'minitar', '>= 0.5.3' )
+  spec.add_dependency( 'minitar', '~> 0.6' )
 end
 
 Gem::PackageTask.new( spec ) do |pkg|
