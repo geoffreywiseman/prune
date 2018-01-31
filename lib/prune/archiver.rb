@@ -4,7 +4,7 @@ require 'date'
 require 'zlib'
 require 'archive/tar/minitar'
 require 'tmpdir'
-include Archive::Tar
+require 'minitar'
 
 module Prune
 

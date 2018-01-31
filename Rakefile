@@ -4,6 +4,9 @@ require 'rspec/core/rake_task'
 require 'rspec'
 require 'rubygems'
 require 'rubygems/package_task'
+
+$: << './lib'
+
 require 'prune'
 
 CLEAN.include( 'pkg' )
