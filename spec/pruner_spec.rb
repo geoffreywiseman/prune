@@ -10,8 +10,8 @@ describe Prune::Pruner do
   before( :each ) do
     @categories = [ Prune::Category.new( "Unmatched Files", :retain, true ) ]
     @retention_policy = double( "RetentionPolicy" )
-    @retention_policy.stub( :categories ) { @categories }
-    Prune::RetentionPolicy.stub( :new ) { @retention_policy }
+    allow(@retention_policy).to receive( :categories ) { @categories }
+    allow(Prune::RetentionPolicy).to receive( :new ) { @retention_policy }
   end
 
   context "w/o prompt" do
@@ -20,9 +20,9 @@ describe Prune::Pruner do
     end
 
     it "should not attempt to process folder that does not exist" do
-      File.stub( :exists? ).with( PRUNE_PATH ) { false }
-      Dir.should_not_receive( :foreach )
-      $stdout.should_receive( :write ).with( /ERROR: Cannot find folder/ )
+      allow(File).to receive( :exists? ).with( PRUNE_PATH ) { false }
+      expect(Dir).not_to receive( :foreach )
+      expect($stdout).to receive( :write ).with( /ERROR: Cannot find folder/ )
       subject.prune( PRUNE_PATH )
     end
 
@@ -35,19 +35,19 @@ describe Prune::Pruner do
       end
 
       it "should not invoke the retention policy" do
-        @retention_policy.should_not_receive( :categorize )
+        expect(@retention_policy).not_to receive( :categorize )
       end
 
       it "should print 'Analyzing #{PRUNE_PATH}'" do
-        @messages.should include("Analyzing '#{PRUNE_PATH}':\n")
+        expect(@messages).to include("Analyzing '#{PRUNE_PATH}':\n")
       end
 
       it "should say no action was required" do
-        @messages.should include("No actions necessary.\n")
+        expect(@messages).to include("No actions necessary.\n")
       end
 
       it "should say no files were analyzed" do
-        @messages.should include_match( /0 file\(s\) analyzed/ )
+        expect(@messages).to include_match( /0 file\(s\) analyzed/ )
       end
 
     end
@@ -61,19 +61,19 @@ describe Prune::Pruner do
       end
 
       it "should not invoke the retention policy" do
-        @retention_policy.should_not_receive( :categorize )
+        expect(@retention_policy).not_to receive( :categorize )
       end
 
       it "should print 'Analyzing #{PRUNE_PATH}'" do
-        @messages.should include("Analyzing '#{PRUNE_PATH}':\n")
+        expect(@messages).to include("Analyzing '#{PRUNE_PATH}':\n")
       end
 
       it "should say no action was required" do
-        @messages.should include("No actions necessary.\n")
+        expect(@messages).to include("No actions necessary.\n")
       end
 
       it "should say no files were analyzed" do
-        @messages.should include_match( /0 file\(s\) analyzed/ )
+        expect(@messages).to include_match( /0 file\(s\) analyzed/ )
       end
 
     end
@@ -88,16 +88,16 @@ describe Prune::Pruner do
       end
 
       it "should categorize each file in modified order" do
-        @retention_policy.should_receive( :categorize ).with( 'alpha.txt' ).ordered
-        @retention_policy.should_receive( :categorize ).with( 'beta.txt' ).ordered
-        @retention_policy.should_receive( :categorize ).with( 'gamma.txt' ).ordered
+        expect(@retention_policy).to receive( :categorize ).with( 'alpha.txt' ).ordered
+        expect(@retention_policy).to receive( :categorize ).with( 'beta.txt' ).ordered
+        expect(@retention_policy).to receive( :categorize ).with( 'gamma.txt' ).ordered
         subject.prune PRUNE_PATH
       end
 
       it "should say three files were analyzed" do
         @retention_policy.as_null_object
         subject.prune PRUNE_PATH
-        @messages.should include_match( /3 file\(s\) analyzed/ )
+        expect(@messages).to include_match( /3 file\(s\) analyzed/ )
       end
 
     end
@@ -111,27 +111,27 @@ describe Prune::Pruner do
         stub_files FILENAME
         
         category = double( category )
-        category.stub( :description ) { "Old" }
-        category.stub( :action ) { :remove }
-        category.stub( :quiet? ) { false }
-        @retention_policy.should_receive( :categorize ).with( FILENAME ) { category }
+        allow(category).to receive( :description ) { "Old" }
+        allow(category).to receive( :action ) { :remove }
+        allow(category).to receive( :quiet? ) { false }
+        expect(@retention_policy).to receive( :categorize ).with( FILENAME ) { category }
       end
       
       it "should delete file" do
-        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 1 }
+        expect(FileUtils).to receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 1 }
         subject.prune PRUNE_PATH
       end
       
       it "should display file deleted message" do
-        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 1 }
+        expect(FileUtils).to receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 1 }
         subject.prune PRUNE_PATH
-        @messages.should include_match( /1 file\(s\) deleted/ )
+        expect(@messages).to include_match( /1 file\(s\) deleted/ )
       end
 
       it "should display failed deletion mesage" do
-        FileUtils.should_receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 0 }
+        expect(FileUtils).to receive( :remove_entry ).with( File.join( PRUNE_PATH, FILENAME ), true ) { 0 }
         subject.prune PRUNE_PATH
-        @messages.should include_match( /0 file\(s\) deleted, 1 file\(s\) could not be deleted/ )
+        expect(@messages).to include_match( /0 file\(s\) deleted, 1 file\(s\) could not be deleted/ )
       end
 
     end
@@ -144,17 +144,17 @@ describe Prune::Pruner do
         stub_messages
         
         category = double( "category" )
-        category.stub( :action ) { :archive }
-        category.stub( :description ) { "Archive" }
-        category.stub( :quiet? ) { false }
+        allow(category).to receive( :action ) { :archive }
+        allow(category).to receive( :description ) { "Archive" }
+        allow(category).to receive( :quiet? ) { false }
         
-        @retention_policy.stub( :categories ) { [ category ]}
+        allow(@retention_policy).to receive( :categories ) { [ category ]}
       end
         
       it "should indicate no archive necessary" do
         subject.prune PRUNE_PATH
         puts "Messages: #{@messages}"
-        @messages.should include_match( /No files categorized for archival/ )
+        expect(@messages).to include_match( /No files categorized for archival/ )
       end
         
     end
@@ -168,17 +168,17 @@ describe Prune::Pruner do
         stub_messages
 
         category = double( "category" )
-        @retention_policy.stub( :categorize ) { category }
-        category.stub( :action ) { :archive }
-        category.stub( :description ) { "Ancient" }
-        category.stub( :quiet? ) { false }
+        allow(@retention_policy).to receive( :categorize ) { category }
+        allow(category).to receive( :action ) { :archive }
+        allow(category).to receive( :description ) { "Ancient" }
+        allow(category).to receive( :quiet? ) { false }
       end
 
       it "should archive files in groups" do
         grouper = double( "Grouper" )
-        Prune::Grouper.stub( :new ) { grouper }
-        grouper.should_receive( :group ).with( PRUNE_PATH, files )
-        grouper.should_receive( :archive ) { "2 Archives created." }
+        allow(Prune::Grouper).to receive( :new ) { grouper }
+        expect(grouper).to receive( :group ).with( PRUNE_PATH, files )
+        expect(grouper).to receive( :archive ) { "2 Archives created." }
 
         subject.prune PRUNE_PATH
       end
@@ -186,7 +186,7 @@ describe Prune::Pruner do
       it "should display message if archive option disabled" do
         subject.options[:archive] = false
         subject.prune PRUNE_PATH
-        @messages.should include_match( /Archive option disabled/ )
+        expect(@messages).to include_match( /Archive option disabled/ )
       end
     end
   
@@ -206,17 +206,17 @@ describe Prune::Pruner do
         
       it "should display empty categories" do
         subject.display_categories( { Prune::Category.new( "Empty Category", :retain ) => [] } )
-        @messages.should include_match( /Empty Category/ )
+        expect(@messages).to include_match( /Empty Category/ )
       end
         
       it "should display quiet categories" do
         subject.display_categories( { Prune::Category.new( "Quiet Category", :retain, true ) => [ 'quiet.txt' ] } )
-        @messages.should include_match( /Quiet Category/ )
+        expect(@messages).to include_match( /Quiet Category/ )
       end
       
       it "should display categories with files" do
         subject.display_categories( { Prune::Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
-        @messages.should include_match( /Normal Category/ )
+        expect(@messages).to include_match( /Normal Category/ )
       end
     end
     
@@ -228,17 +228,17 @@ describe Prune::Pruner do
         
       it "should not display empty categories" do
         subject.display_categories( { Prune::Category.new( "Empty Category", :retain, true ) => [] } )
-        @messages.should_not include_match( /Empty Category/ )
+        expect(@messages).not_to include_match( /Empty Category/ )
       end
       
       it "should not display quiet categories" do
         subject.display_categories( { Prune::Category.new( "Quiet Category", :retain, true ) => [ 'shhh.txt' ] } )
-        @messages.should_not include_match( /Quiet Category/ )
+        expect(@messages).not_to include_match( /Quiet Category/ )
       end
       
       it "should display categories with files" do
         subject.display_categories( { Prune::Category.new( "Normal Category", :retain ) => [ 'normal.txt' ] } )
-        @messages.should include_match( /Normal Category/ )
+        expect(@messages).to include_match( /Normal Category/ )
       end
 
     end
@@ -251,76 +251,76 @@ describe Prune::Pruner do
 
     it "should interpret 'Y' as true" do
       expect_prompt_with_response( "Y\n")
-      subject.prompt.should be_true
+      expect(subject.prompt).to be_truthy
     end
 
     it "should interpret 'Y ' as true" do
       expect_prompt_with_response("Y \n")
-      subject.prompt.should be_true
+      expect(subject.prompt).to be_truthy
     end
 
     it "should interpret ' Y' as true" do
       expect_prompt_with_response(" Y\n")
-      subject.prompt.should be_true
+      expect(subject.prompt).to be_truthy
     end
 
     it "should interpret ' Y ' as true" do
       expect_prompt_with_response(" Y \n")
-      subject.prompt.should be_true
+      expect(subject.prompt).to be_truthy
     end
 
     it "should interpret 'y' as true" do
       expect_prompt_with_response("y\n")
-      subject.prompt.should be_true
+      expect(subject.prompt).to be_truthy
     end
 
     it "should interpret 'yes' as true" do
       expect_prompt_with_response("yes\n")
-      subject.prompt.should be_true
+      expect(subject.prompt).to be_truthy
     end
 
     it "should interpret 'no' as false" do
       expect_prompt_with_response("no\n")
-      subject.prompt.should be_false
+      expect(subject.prompt).to be_falsey
     end
 
     it "should interpret 'n' as false" do
       expect_prompt_with_response("n\n")
-      subject.prompt.should be_false
+      expect(subject.prompt).to be_falsey
     end
 
     it "should interpret 'N' as false" do
       expect_prompt_with_response("N\n")
-      subject.prompt.should be_false
+      expect(subject.prompt).to be_falsey
     end
 
     it "should interpret 'q' as false" do
       expect_prompt_with_response("q\n")
-      subject.prompt.should be_false
+      expect(subject.prompt).to be_falsey
     end
 
     def expect_prompt_with_response( response )
-      $stdout.should_receive( :write ).with( /Proceed?/ )
-      STDIN.stub(:gets) { response }
+      expect($stdout).to receive( :write ).with( /Proceed?/ )
+      allow(STDIN).to receive(:gets) { response }
     end
 
   end
 
   def stub_files( files = nil )
-    File.stub( :exists? ).with( PRUNE_PATH ) { true }
-    File.stub( :directory? ).with( PRUNE_PATH ) { true }
+    allow(File).to receive( :exists? ).with( PRUNE_PATH ) { true }
+    allow(File).to receive( :directory? ).with( PRUNE_PATH ) { true }
     case files
     when nil
-      Dir.stub( :entries ).with( PRUNE_PATH ) { Array.new }
+      allow(Dir).to receive( :entries ).with( PRUNE_PATH ) { Array.new }
     when String
-      subject.stub(:test).with( ?M, File.join( PRUNE_PATH, files ) ) { Time.now }
-      Dir.stub( :entries ).with( PRUNE_PATH ) { [ files ] }
+      allow(subject).to receive(:test).with( ?M, File.join( PRUNE_PATH, files ) ) { Time.now }
+      allow(Dir).to receive( :entries ).with( PRUNE_PATH ) { [ files ] }
     when Array
-      files.each_index { |index| subject.stub(:test).with( ?M, File.join( PRUNE_PATH, files[index] ) ) { index }  }
-      Dir.stub( :entries ).with( PRUNE_PATH ) { files }
+      files.each_index { |index| allow(subject).to receive(:test).with( ?M, File.join( PRUNE_PATH, files[index] ) ) { index }  }
+      allow(Dir).to receive( :entries ).with( PRUNE_PATH ) { files }
     when Hash
-      files.each_key { |key| subject.stub(:test).with( ?M, File.join( PRUNE_PATH, key ) ) { files[key] } }
-      Dir.stub( :entries ).with( PRUNE_PATH ) { files.keys }
+      files.each_key { |key| allow(subject).to receive(:test).with( ?M, File.join( PRUNE_PATH, key ) ) { files[key] } }
+      allow(Dir).to receive( :entries ).with( PRUNE_PATH ) { files.keys }
     else
       raise "Don't know how to stub files for #{files.class}"
     end

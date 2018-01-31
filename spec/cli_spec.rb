@@ -10,7 +10,7 @@ describe Prune::CommandLineInterface do
 
   before(:each) do
     @messages = []
-    $stdout.stub( :write ) { |message| @messages << message  }
+    allow($stdout).to receive( :write ) { |message| @messages << message  }
 
     @pruner = double( "pruner" )
   end
@@ -20,7 +20,7 @@ describe Prune::CommandLineInterface do
     it "should print help" do
       ARGV.clear
       Prune::CommandLineInterface::parse_and_run
-      @messages.should include_match( USAGE_TEXT )
+      expect(@messages).to include_match( USAGE_TEXT )
     end
 
   end
@@ -30,17 +30,17 @@ describe Prune::CommandLineInterface do
 
     before(:each) do
       ARGV.clear.push( PATH )
-      @pruner.stub(:prune)
+      allow(@pruner).to receive(:prune)
     end
 
     it "should call prune with path" do
-      Prune::Pruner.stub( :new ) { @pruner }
-      @pruner.should_receive( :prune ).with( PATH )
+      allow(Prune::Pruner).to receive( :new ) { @pruner }
+      expect(@pruner).to receive( :prune ).with( PATH )
       Prune::CommandLineInterface::parse_and_run
     end
 
     it "should create pruner with defaults" do
-      Prune::Pruner.stub( :new ).with( Prune::CommandLineInterface::DEFAULT_OPTIONS ) { @pruner }
+      allow(Prune::Pruner).to receive( :new ).with( Prune::CommandLineInterface::DEFAULT_OPTIONS ) { @pruner }
       Prune::CommandLineInterface::parse_and_run
     end
 
@@ -89,8 +89,8 @@ describe Prune::CommandLineInterface do
     describe "and a --config argument" do
       it "should set the configure option to true" do
         configurer = double( "Configurer" )
-        Prune::Configurer.should_receive( :new ).with( PATH, hash_including( :configure => true ) ).and_return( configurer )
-        configurer.should_receive( :configure )
+        expect(Prune::Configurer).to receive( :new ).with( PATH, hash_including( :configure => true ) ).and_return( configurer )
+        expect(configurer).to receive( :configure )
         ARGV.push( "--config" )
         Prune::CommandLineInterface::parse_and_run
       end
@@ -103,9 +103,9 @@ describe Prune::CommandLineInterface do
 
       describe "with no folder name" do
         it "should print a parsing error" do
-          $stderr.stub( :print ) { |message| @messages << message  }
+          allow($stderr).to receive( :print ) { |message| @messages << message  }
           Prune::CommandLineInterface::parse_and_run
-          @messages.should include_match( /missing argument: -a/ )
+          expect(@messages).to include_match( /missing argument: -a/ )
         end
       end
 
@@ -123,9 +123,9 @@ describe Prune::CommandLineInterface do
 
       describe "with no folder name" do
         it "should print a parsing error" do
-          $stderr.stub( :print ) { |message| @messages << message  }
+          allow($stderr).to receive( :print ) { |message| @messages << message  }
           Prune::CommandLineInterface::parse_and_run
-          @messages.should include_match( /missing argument: --archive-folder/ )
+          expect(@messages).to include_match( /missing argument: --archive-folder/ )
         end
       end
 
@@ -144,11 +144,11 @@ describe Prune::CommandLineInterface do
 
       it "should print help" do
         Prune::CommandLineInterface::parse_and_run
-        @messages.should include_match( USAGE_TEXT )
+        expect(@messages).to include_match( USAGE_TEXT )
       end
 
       it "should not invoke prune" do
-        @pruner.should_not_receive( :prune )
+        expect(@pruner).not_to receive( :prune )
         Prune::CommandLineInterface::parse_and_run
       end
 
@@ -162,11 +162,11 @@ describe Prune::CommandLineInterface do
 
       it "should print help" do
         Prune::CommandLineInterface::parse_and_run
-        @messages.should include_match( USAGE_TEXT )
+        expect(@messages).to include_match( USAGE_TEXT )
       end
 
       it "should not invoke prune" do
-        @pruner.should_not_receive( :prune )
+        expect(@pruner).not_to receive( :prune )
         Prune::CommandLineInterface::parse_and_run
       end
 
@@ -175,9 +175,9 @@ describe Prune::CommandLineInterface do
     describe "and an unknown argument" do
       it "should print a parsing error" do
         ARGV.push "--unknown-argument"
-        $stderr.stub( :print ) { |message| @messages << message  }
+        allow($stderr).to receive( :print ) { |message| @messages << message  }
         Prune::CommandLineInterface::parse_and_run
-        @messages.should include_match( /invalid option/ )
+        expect(@messages).to include_match( /invalid option/ )
       end
     end
 
@@ -187,13 +187,13 @@ describe Prune::CommandLineInterface do
       end
 
       it "should print version number" do
-          $stderr.stub( :print ) { |message| @messages << message  }
+          allow($stderr).to receive( :print ) { |message| @messages << message  }
           Prune::CommandLineInterface::parse_and_run
-          @messages.should include_match( /Prune #{Prune::VERSION}/ )
+          expect(@messages).to include_match( /Prune #{Prune::VERSION}/ )
       end
 
       it "should not invoke prune" do
-        @pruner.should_not_receive( :prune )
+        expect(@pruner).not_to receive( :prune )
         Prune::CommandLineInterface::parse_and_run
       end
 
@@ -206,7 +206,7 @@ describe Prune::CommandLineInterface do
     end
 
     def assert_arg_to_option( arg, *options )
-      Prune::Pruner.should_receive( :new ).with( hash_including( *options ) ).and_return( @pruner )
+      expect(Prune::Pruner).to receive( :new ).with( hash_including( *options ) ).and_return( @pruner )
       ARGV.push( arg )
       Prune::CommandLineInterface::parse_and_run
     end
